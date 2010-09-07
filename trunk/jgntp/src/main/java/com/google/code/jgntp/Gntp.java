@@ -18,6 +18,7 @@ package com.google.code.jgntp;
 import java.net.*;
 import java.util.concurrent.*;
 
+import com.google.code.jgntp.internal.*;
 import com.google.code.jgntp.internal.io.*;
 import com.google.common.base.*;
 
@@ -36,6 +37,7 @@ public class Gntp {
 	private int growlPort;
 	private Executor executor;
 	private GntpListener listener;
+	private GntpPassword password;
 	private long retryTime;
 	private TimeUnit retryTimeUnit;
 	private int notificationRetryCount;
@@ -60,6 +62,10 @@ public class Gntp {
 
 	public static GntpNotificationBuilder notification(GntpNotificationInfo info, String title) {
 		return new GntpNotificationBuilder(info, title);
+	}
+
+	public static GntpPassword password(String textPassword) {
+		return new GntpPasswordDefaultImpl(textPassword);
 	}
 
 	public static Gntp client(GntpApplicationInfo applicationInfo) {
@@ -93,6 +99,16 @@ public class Gntp {
 		return this;
 	}
 
+	public Gntp withPassword(String textPassword) {
+		this.password = password(textPassword);
+		return this;
+	}
+
+	public Gntp withPassword(GntpPassword password) {
+		this.password = password;
+		return this;
+	}
+
 	public Gntp retryingAtFixedRate(long time, TimeUnit unit) {
 		Preconditions.checkArgument(time > 0, "Retrying time must be greater than zero");
 		Preconditions.checkArgument(unit != null, "Retrying time unit must not be null");
@@ -118,7 +134,7 @@ public class Gntp {
 			growlAddress = new InetSocketAddress(growlHost, growlPort);
 		}
 		Executor executorToUse = executor == null ? Executors.newCachedThreadPool() : executor;
-		return new NioGntpClient(applicationInfo, growlAddress, executorToUse, listener, retryTime, retryTimeUnit, notificationRetryCount);
+		return new NioGntpClient(applicationInfo, growlAddress, executorToUse, listener, password, retryTime, retryTimeUnit, notificationRetryCount);
 	}
 
 	private int getPort() {

@@ -23,8 +23,8 @@ public class GntpRegisterMessage extends GntpMessage {
 
 	private final GntpApplicationInfo info;
 
-	public GntpRegisterMessage(GntpApplicationInfo applicationInfo) {
-		super(GntpMessageType.REGISTER);
+	public GntpRegisterMessage(GntpApplicationInfo applicationInfo, GntpPassword password) {
+		super(GntpMessageType.REGISTER, password);
 		info = applicationInfo;
 	}
 
@@ -32,7 +32,11 @@ public class GntpRegisterMessage extends GntpMessage {
 	public void append(OutputStream output) throws IOException {
 		OutputStreamWriter writer = new OutputStreamWriter(output, ENCODING);
 		appendStatusLine(writer);
-		appendSeparator(writer);
+/*		writer.append(PROTOCOL_ID).append('/').append(GntpVersion.ONE_DOT_ZERO.toString());
+		writer.append(' ').append(GntpMessageType.REGISTER.toString());
+		writer.append(' ').append("NONE SHA1");
+		writer.append(":00559CCC6E202A064C8BBCC053BBA9FCFA1D8CB5.3A2EEFBFBD297C33EFBFBD");
+*/		appendSeparator(writer);
 
 		appendHeader(GntpMessageHeader.APPLICATION_NAME, info.getName(), writer);
 		appendSeparator(writer);

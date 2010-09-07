@@ -22,7 +22,7 @@ public abstract class GntpMessageResponse extends GntpMessage {
 	private final GntpMessageType respondingType;
 
 	public GntpMessageResponse(GntpMessageType type, GntpMessageType respondingType) {
-		super(type);
+		super(type, null);
 		this.respondingType = respondingType;
 	}
 
