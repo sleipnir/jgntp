@@ -25,7 +25,7 @@ public abstract class GntpMessageResponse extends GntpMessage {
 		super(type);
 		this.respondingType = respondingType;
 	}
-	
+
 	public GntpMessageType getRespondingType() {
 		return respondingType;
 	}

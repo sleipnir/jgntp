@@ -29,7 +29,7 @@ public class GntpNotifyMessage extends GntpMessage {
 		this.notification = notification;
 		this.contextId = contextId;
 	}
-	
+
 	@Override
 	public void append(OutputStream output) throws IOException {
 		OutputStreamWriter writer = new OutputStreamWriter(output, ENCODING);
@@ -64,9 +64,9 @@ public class GntpNotifyMessage extends GntpMessage {
 			appendHeader(GntpMessageHeader.NOTIFICATION_PRIORITY, notification.getPriority().getCode(), writer);
 			appendSeparator(writer);
 		}
-		
+
 		appendIcon(GntpMessageHeader.NOTIFICATION_ICON, notification.getIconImage(), notification.getIconUri(), writer);
-		
+
 		if (notification.getCoalescingId() != null) {
 			appendHeader(GntpMessageHeader.NOTIFICATION_COALESCING_ID, notification.getCoalescingId(), writer);
 			appendSeparator(writer);
@@ -76,11 +76,11 @@ public class GntpNotifyMessage extends GntpMessage {
 			appendHeader(GntpMessageHeader.NOTIFICATION_CALLBACK_TARGET, notification.getCallbackTarget(), writer);
 			appendSeparator(writer);
 		}
-		
+
 		if (notification.isCallbackRequested()) {
 			appendHeader(GntpMessageHeader.NOTIFICATION_CALLBACK_CONTEXT, contextId, writer);
 			appendSeparator(writer);
-			
+
 			appendHeader(GntpMessageHeader.NOTIFICATION_CALLBACK_CONTEXT_TYPE, "int", writer);
 			appendSeparator(writer);
 		}

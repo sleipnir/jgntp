@@ -66,7 +66,7 @@ public class GntpMessageResponseParser {
 		String notificationId = GntpMessageHeader.NOTIFICATION_ID.getValueInMap(headers);
 		return new GntpOkMessage(getRespondingType(headers), notificationId);
 	}
-	
+
 	protected GntpCallbackMessage createCallbackMessage(Map<String, String> headers) {
 		String notificationId = GntpMessageHeader.NOTIFICATION_ID.getValueInMap(headers);
 		String callbackResultText = GntpMessageHeader.NOTIFICATION_CALLBACK_RESULT.getRequiredValueInMap(headers);

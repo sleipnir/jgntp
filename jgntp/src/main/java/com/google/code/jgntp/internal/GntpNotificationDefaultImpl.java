@@ -36,8 +36,8 @@ public class GntpNotificationDefaultImpl implements GntpNotification {
 	private final boolean callbackRequested;
 	private final Object context;
 
-	public GntpNotificationDefaultImpl(String applicationName, String name, String id, String title, String text, Boolean sticky, Priority priority, RenderedImage iconImage, URI iconUri, String coalescingId, URI callbackTarget,
-	                        boolean callbackRequested, Object context) {
+	public GntpNotificationDefaultImpl(String applicationName, String name, String id, String title, String text, Boolean sticky, Priority priority, RenderedImage iconImage, URI iconUri,
+			String coalescingId, URI callbackTarget, boolean callbackRequested, Object context) {
 		this.applicationName = applicationName;
 		this.name = name;
 		this.id = id;
@@ -122,5 +122,5 @@ public class GntpNotificationDefaultImpl implements GntpNotification {
 	public String toString() {
 		return String.format("application=%s, name=%s, title=%s, text=%s", applicationName, name, title, text);
 	}
-	
+
 }

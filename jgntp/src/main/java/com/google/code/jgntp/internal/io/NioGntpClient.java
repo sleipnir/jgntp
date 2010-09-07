@@ -31,7 +31,7 @@ import com.google.code.jgntp.internal.message.*;
 import com.google.common.collect.*;
 
 public class NioGntpClient implements GntpClient {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(NioGntpClient.class);
 
 	private final GntpApplicationInfo applicationInfo;
@@ -54,22 +54,22 @@ public class NioGntpClient implements GntpClient {
 		this.retryTime = retryTime;
 		this.retryTimeUnit = retryTimeUnit;
 		this.notificationRetryCount = notificationRetryCount;
-		
+
 		if (retryTime > 0) {
 			retryExecutorService = Executors.newSingleThreadScheduledExecutor();
 		} else {
 			retryExecutorService = null;
 		}
 
-		this.bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(executor, executor));
-		this.bootstrap.setPipelineFactory(new GntpChannelPipelineFactory(new GntpChannelHandler(this, listener)));
-		this.bootstrap.setOption("tcpNoDelay", true);
-		this.bootstrap.setOption("remoteAddress", growlAddress);
-		this.channelGroup = new DefaultChannelGroup("jgntp");
-		this.contextIdGenerator = new AtomicLong();
-		this.callbackContexts = Maps.newConcurrentMap();
-		this.registrationLatch = new CountDownLatch(1);
-		this.notificationRetries = Maps.newConcurrentMap();
+		bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(executor, executor));
+		bootstrap.setPipelineFactory(new GntpChannelPipelineFactory(new GntpChannelHandler(this, listener)));
+		bootstrap.setOption("tcpNoDelay", true);
+		bootstrap.setOption("remoteAddress", growlAddress);
+		channelGroup = new DefaultChannelGroup("jgntp");
+		contextIdGenerator = new AtomicLong();
+		callbackContexts = Maps.newConcurrentMap();
+		registrationLatch = new CountDownLatch(1);
+		notificationRetries = Maps.newConcurrentMap();
 	}
 
 	public void register() {
@@ -100,7 +100,7 @@ public class NioGntpClient implements GntpClient {
 	public boolean isRegistered() {
 		return registrationLatch.getCount() == 0 && !closed;
 	}
-	
+
 	@Override
 	public void waitRegistration() throws InterruptedException {
 		registrationLatch.await();
@@ -163,7 +163,7 @@ public class NioGntpClient implements GntpClient {
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
 						channelGroup.add(future.getChannel());
-						
+
 						long contextId;
 						if (notification.isCallbackRequested()) {
 							contextId = contextIdGenerator.getAndIncrement();
@@ -173,7 +173,7 @@ public class NioGntpClient implements GntpClient {
 						} else {
 							contextId = -1;
 						}
-	
+
 						GntpMessage message = new GntpNotifyMessage(notification, contextId);
 						future.getChannel().write(message);
 					} else {

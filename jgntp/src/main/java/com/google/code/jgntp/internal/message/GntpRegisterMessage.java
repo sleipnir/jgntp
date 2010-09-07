@@ -25,9 +25,10 @@ public class GntpRegisterMessage extends GntpMessage {
 
 	public GntpRegisterMessage(GntpApplicationInfo applicationInfo) {
 		super(GntpMessageType.REGISTER);
-		this.info = applicationInfo;
+		info = applicationInfo;
 	}
 
+	@Override
 	public void append(OutputStream output) throws IOException {
 		OutputStreamWriter writer = new OutputStreamWriter(output, ENCODING);
 		appendStatusLine(writer);

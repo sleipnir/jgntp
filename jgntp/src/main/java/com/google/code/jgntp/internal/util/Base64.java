@@ -147,6 +147,7 @@ package com.google.code.jgntp.internal.util;
  * @author rob@iharder.net
  * @version 2.3.7
  */
+@SuppressWarnings("null")
 public class Base64
 {
     
@@ -649,7 +650,7 @@ public class Base64
      * @throws java.io.IOException if there is an error
      * @since 2.0
      */
-    public static String encodeObject( java.io.Serializable serializableObject, int options )
+	public static String encodeObject( java.io.Serializable serializableObject, int options )
     throws java.io.IOException {
 
         if( serializableObject == null ){

@@ -25,7 +25,7 @@ import com.google.common.base.*;
 public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 
 	private Logger logger = LoggerFactory.getLogger(GntpChannelHandler.class);
-	
+
 	private final NioGntpClient gntpClient;
 	private final GntpListener listener;
 
@@ -33,7 +33,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 		this.gntpClient = gntpClient;
 		this.listener = listener;
 	}
-	
+
 	@Override
 	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 		logger.debug("Channel closed [{}]", e.getChannel());
@@ -41,7 +41,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-		GntpMessageResponse message = (GntpMessageResponse)e.getMessage();
+		GntpMessageResponse message = (GntpMessageResponse) e.getMessage();
 		Preconditions.checkState(message instanceof GntpOkMessage || message instanceof GntpCallbackMessage || message instanceof GntpErrorMessage);
 
 		if (gntpClient.isRegistered()) {
@@ -49,7 +49,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 				if (listener == null) {
 					throw new IllegalStateException("A GntpListener must be set in GntpClient to be able to receive callbacks");
 				}
-				GntpCallbackMessage callbackMessage = (GntpCallbackMessage)message;
+				GntpCallbackMessage callbackMessage = (GntpCallbackMessage) message;
 				long contextId = Long.parseLong(callbackMessage.getContext());
 				Object context = gntpClient.getCallbackContexts().remove(contextId);
 				switch (callbackMessage.getCallbackResult()) {
@@ -66,7 +66,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 						throw new IllegalStateException("Unknown callback result: " + callbackMessage.getCallbackResult());
 				}
 			} else if (message instanceof GntpErrorMessage) {
-				handleErrorMessage((GntpErrorMessage)message);
+				handleErrorMessage((GntpErrorMessage) message);
 			}
 		} else {
 			if (message instanceof GntpOkMessage) {
@@ -78,7 +78,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 					gntpClient.setRegistered();
 				}
 			} else if (message instanceof GntpErrorMessage) {
-				handleErrorMessage((GntpErrorMessage)message);
+				handleErrorMessage((GntpErrorMessage) message);
 			}
 		}
 	}
@@ -95,7 +95,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 			e.getChannel().close();
 		}
 	}
-	
+
 	protected void handleErrorMessage(GntpErrorMessage message) {
 		if (listener != null) {
 			listener.onRegistrationError(message.getStatus(), message.getDescription());

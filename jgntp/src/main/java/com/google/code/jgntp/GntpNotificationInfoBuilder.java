@@ -35,10 +35,11 @@ public class GntpNotificationInfoBuilder {
 		Preconditions.checkNotNull(name, "Notification name must not be null");
 		this.applicationInfo = applicationInfo;
 		this.name = name;
-		this.enabled = true;
+		enabled = true;
 	}
 
 	public GntpNotificationInfoBuilder applicationInfo(GntpApplicationInfo applicationInfo) {
+		this.applicationInfo = applicationInfo;
 		return this;
 	}
 
@@ -59,14 +60,14 @@ public class GntpNotificationInfoBuilder {
 	}
 
 	public GntpNotificationInfoBuilder icon(RenderedImage image) {
-		this.iconImage = image;
-		this.iconUri = null;
+		iconImage = image;
+		iconUri = null;
 		return this;
 	}
 
 	public GntpNotificationInfoBuilder icon(URI uri) {
-		this.iconUri = uri;
-		this.iconImage = null;
+		iconUri = uri;
+		iconImage = null;
 		return this;
 	}
 

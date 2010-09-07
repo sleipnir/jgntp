@@ -43,11 +43,11 @@ public class Gntp {
 	private Gntp(GntpApplicationInfo applicationInfo) {
 		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
 		this.applicationInfo = applicationInfo;
-		this.growlHost = DEFAULT_HOST;
-		this.growlPort = getPort();
-		this.retryTime = DEFAULT_RETRY_TIME;
-		this.retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
-		this.notificationRetryCount = DEFAULT_NOTIFICATION_RETRIES;
+		growlHost = DEFAULT_HOST;
+		growlPort = getPort();
+		retryTime = DEFAULT_RETRY_TIME;
+		retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
+		notificationRetryCount = DEFAULT_NOTIFICATION_RETRIES;
 	}
 
 	public static GntpApplicationInfoBuilder appInfo(String name) {
@@ -67,19 +67,19 @@ public class Gntp {
 	}
 
 	public Gntp forAddress(SocketAddress address) {
-		this.growlAddress = address;
+		growlAddress = address;
 		return this;
 	}
 
 	public Gntp forHost(String host) {
 		Preconditions.checkNotNull(host, "Growl host must not be null");
-		this.growlHost = host;
+		growlHost = host;
 		return this;
 	}
 
 	public Gntp onPort(int port) {
 		Preconditions.checkArgument(port > 0, "Port must not be negative");
-		this.growlPort = port;
+		growlPort = port;
 		return this;
 	}
 
@@ -96,8 +96,8 @@ public class Gntp {
 	public Gntp retryingAtFixedRate(long time, TimeUnit unit) {
 		Preconditions.checkArgument(time > 0, "Retrying time must be greater than zero");
 		Preconditions.checkArgument(unit != null, "Retrying time unit must not be null");
-		this.retryTime = time;
-		this.retryTimeUnit = unit;
+		retryTime = time;
+		retryTimeUnit = unit;
 		return this;
 	}
 
@@ -108,8 +108,8 @@ public class Gntp {
 	}
 
 	public Gntp withoutRetry() {
-		this.retryTime = 0;
-		this.retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
+		retryTime = 0;
+		retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
 		return this;
 	}
 
@@ -120,7 +120,7 @@ public class Gntp {
 		Executor executorToUse = executor == null ? Executors.newCachedThreadPool() : executor;
 		return new NioGntpClient(applicationInfo, growlAddress, executorToUse, listener, retryTime, retryTimeUnit, notificationRetryCount);
 	}
-	
+
 	private int getPort() {
 		String osName = System.getProperty("os.name");
 		if (osName != null) {
