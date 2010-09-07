@@ -30,9 +30,9 @@ public class GntpClientTest {
 
 	@Test
 	public void test() throws Exception {
-		String iconUrl = "http://android-notifier-desktop.googlecode.com/svn/trunk/android-notifier-desktop/src/main/resources/com/google/code/notifier/desktop/icon.png";
-		GntpApplicationInfo info = Gntp.appInfo("Test").icon(URI.create(iconUrl)).build();
+		GntpApplicationInfo info = Gntp.appInfo("Test").icon(ImageIO.read(getClass().getResourceAsStream("icon.png"))).build();
 		GntpNotificationInfo notif1 = Gntp.notificationInfo(info, "Notify 1").icon(ImageIO.read(getClass().getResourceAsStream("icon.png"))).build();
+		GntpNotificationInfo notif2 = Gntp.notificationInfo(info, "Notify 2").icon(ImageIO.read(getClass().getResourceAsStream("sms.png"))).build();
 
 		GntpClient client = Gntp.client(info).withListener(new GntpListener() {
 			@Override
