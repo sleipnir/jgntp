@@ -49,7 +49,7 @@ public abstract class GntpMessage {
 	private final GntpVersion version;
 	private final GntpMessageType type;
 	private final Map<String, String> headers;
-	private final Set<BinarySection> binarySections;
+	private final List<BinarySection> binarySections;
 	private final DateFormat dateFormat;
 
 	public GntpMessage(GntpMessageType type) {
@@ -60,7 +60,7 @@ public abstract class GntpMessage {
 		this.version = version;
 		this.type = type;
 		headers = Maps.newHashMap();
-		binarySections = Sets.newHashSet();
+		binarySections = Lists.newArrayList();
 		dateFormat = new SimpleDateFormat();
 	}
 
@@ -125,18 +125,23 @@ public abstract class GntpMessage {
 
 	public void appendBinarySections(OutputStream output) throws IOException {
 		OutputStreamWriter writer = new OutputStreamWriter(output, ENCODING);
-		for (BinarySection binarySection : binarySections) {
+		for (Iterator<BinarySection> iter = binarySections.iterator(); iter.hasNext(); ) {
+			BinarySection binarySection = iter.next();
 			binarySection.append(output, writer);
-			appendSeparator(writer);
+			if (iter.hasNext()) {
+				appendSeparator(writer);
+				appendSeparator(writer);
+			}
 		}
-	}
-
-	public void appendEndOfMessage(OutputStreamWriter writer) throws IOException {
-		writer.append(SEPARATOR).append(SEPARATOR);
+		writer.flush();
 	}
 
 	public void appendSeparator(OutputStreamWriter writer) throws IOException {
 		writer.append(SEPARATOR);
+	}
+
+	public void clearBinarySections() {
+		binarySections.clear();
 	}
 
 	public void putHeaders(Map<String, String> map) {
@@ -172,9 +177,6 @@ public abstract class GntpMessage {
 			writer.flush();
 
 			output.write(data);
-
-			writer.append(SEPARATOR);
-			writer.flush();
 		}
 
 		public String getId() {

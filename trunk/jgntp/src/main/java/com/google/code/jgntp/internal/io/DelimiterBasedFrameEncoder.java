@@ -36,7 +36,15 @@ public class DelimiterBasedFrameEncoder extends OneToOneEncoder {
 		if (!(msg instanceof ChannelBuffer)) {
 			return msg;
 		}
-		return copiedBuffer((ChannelBuffer) msg, delimiter);
+		ChannelBuffer buf = copiedBuffer((ChannelBuffer) msg, delimiter);
+		
+/*		FileOutputStream fos = new FileOutputStream("dump.out");
+		while (buf.readable()) {
+			fos.write(buf.readByte());
+		}
+		fos.close();
+		buf.resetReaderIndex();
+*/		return buf;
 	}
 
 }
