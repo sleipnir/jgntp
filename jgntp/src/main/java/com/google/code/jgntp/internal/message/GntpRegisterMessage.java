@@ -67,6 +67,6 @@ public class GntpRegisterMessage extends GntpMessage {
 		writer.flush();
 
 		appendBinarySections(output);
-		writer.flush();
+		clearBinarySections();
 	}
 }

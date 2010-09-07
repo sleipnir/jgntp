@@ -65,7 +65,9 @@ public class GntpNotifyMessage extends GntpMessage {
 			appendSeparator(writer);
 		}
 
-		appendIcon(GntpMessageHeader.NOTIFICATION_ICON, notification.getIconImage(), notification.getIconUri(), writer);
+		if (appendIcon(GntpMessageHeader.NOTIFICATION_ICON, notification.getIconImage(), notification.getIconUri(), writer)) {
+			appendSeparator(writer);
+		}
 
 		if (notification.getCoalescingId() != null) {
 			appendHeader(GntpMessageHeader.NOTIFICATION_COALESCING_ID, notification.getCoalescingId(), writer);
@@ -88,6 +90,6 @@ public class GntpNotifyMessage extends GntpMessage {
 		writer.flush();
 
 		appendBinarySections(output);
-		writer.flush();
+		clearBinarySections();
 	}
 }
