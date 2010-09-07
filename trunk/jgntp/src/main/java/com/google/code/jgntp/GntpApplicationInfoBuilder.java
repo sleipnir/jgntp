@@ -39,17 +39,17 @@ public class GntpApplicationInfoBuilder {
 	}
 
 	public GntpApplicationInfoBuilder icon(RenderedImage image) {
-		this.iconImage = image;
-		this.iconUri = null;
+		iconImage = image;
+		iconUri = null;
 		return this;
 	}
 
 	public GntpApplicationInfoBuilder icon(URI uri) {
-		this.iconUri = uri;
-		this.iconImage = null;
+		iconUri = uri;
+		iconImage = null;
 		return this;
 	}
-	
+
 	public GntpApplicationInfo build() {
 		return new GntpApplicationInfoDefaultImpl(name, iconImage, iconUri);
 	}

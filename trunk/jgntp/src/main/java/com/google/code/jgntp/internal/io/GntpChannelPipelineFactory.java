@@ -27,9 +27,9 @@ public class GntpChannelPipelineFactory implements ChannelPipelineFactory {
 	private final ChannelHandler handler;
 
 	public GntpChannelPipelineFactory(ChannelHandler handler) {
-		this.delimiterEncoder = new DelimiterBasedFrameEncoder(getDelimiter());
-		this.messageDecoder = new GntpMessageDecoder();
-		this.messageEncoder = new GntpMessageEncoder();
+		delimiterEncoder = new DelimiterBasedFrameEncoder(getDelimiter());
+		messageDecoder = new GntpMessageDecoder();
+		messageEncoder = new GntpMessageEncoder();
 		this.handler = handler;
 	}
 
@@ -41,13 +41,11 @@ public class GntpChannelPipelineFactory implements ChannelPipelineFactory {
 		pipeline.addLast("message-decoder", messageDecoder);
 		pipeline.addLast("message-encoder", messageEncoder);
 		pipeline.addLast("handler", handler);
-		
+
 		return pipeline;
 	}
 
 	protected ChannelBuffer getDelimiter() {
-		return ChannelBuffers.wrappedBuffer(new byte[] {
-			(byte)'\r', (byte)'\n', (byte)'\r', (byte)'\n'
-		});
+		return ChannelBuffers.wrappedBuffer(new byte[] { (byte) '\r', (byte) '\n', (byte) '\r', (byte) '\n' });
 	}
 }

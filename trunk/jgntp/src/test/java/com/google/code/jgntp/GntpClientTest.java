@@ -73,7 +73,7 @@ public class GntpClientTest {
 
 		client.register();
 		client.notify(Gntp.notification(notif1, "Title").text("Message").withCallback().context(12345).build(), 5, SECONDS);
-		client.notify(Gntp.notification(notif1, "Title 2").text("Message 2").callbackTarget(URI.create("http://slashdot.org/")).build(), 5, SECONDS);
+		client.notify(Gntp.notification(notif2, "Title 2").text("Message 2").callbackTarget(URI.create("http://slashdot.org/")).build(), 5, SECONDS);
 		SECONDS.sleep(5);
 		client.shutdown(1, SECONDS);
 	}

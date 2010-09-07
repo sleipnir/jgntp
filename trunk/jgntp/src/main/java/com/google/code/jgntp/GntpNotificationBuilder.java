@@ -41,15 +41,15 @@ public class GntpNotificationBuilder {
 	public GntpNotificationBuilder(GntpNotificationInfo info, String title) {
 		Preconditions.checkNotNull(info, "Notification info must not be null");
 		Preconditions.checkNotNull(title, "Notification title must not be null");
-		this.applicationName = info.getApplicationInfo().getName();
-		this.name = info.getName();
+		applicationName = info.getApplicationInfo().getName();
+		name = info.getName();
 		this.title = title;
 	}
 
 	public GntpNotificationBuilder info(GntpNotificationInfo info) {
 		Preconditions.checkNotNull(info, "Notification info must not be null");
-		this.applicationName = info.getApplicationInfo().getName();
-		this.name = info.getName();
+		applicationName = info.getApplicationInfo().getName();
+		name = info.getName();
 		return this;
 	}
 
@@ -80,14 +80,14 @@ public class GntpNotificationBuilder {
 	}
 
 	public GntpNotificationBuilder icon(RenderedImage image) {
-		this.iconImage = image;
-		this.iconUri = null;
+		iconImage = image;
+		iconUri = null;
 		return this;
 	}
 
 	public GntpNotificationBuilder icon(URI uri) {
-		this.iconUri = uri;
-		this.iconImage = null;
+		iconUri = uri;
+		iconImage = null;
 		return this;
 	}
 
@@ -98,18 +98,18 @@ public class GntpNotificationBuilder {
 
 	public GntpNotificationBuilder callbackTarget(URI callbackTarget) {
 		this.callbackTarget = callbackTarget;
-		this.callbackRequested = false;
+		callbackRequested = false;
 		return this;
 	}
 
 	public GntpNotificationBuilder withCallback() {
-		this.callbackRequested = true;
-		this.callbackTarget = null;
+		callbackRequested = true;
+		callbackTarget = null;
 		return this;
 	}
 
 	public GntpNotificationBuilder withoutCallback() {
-		this.callbackRequested = false;
+		callbackRequested = false;
 		return this;
 	}
 
@@ -117,7 +117,7 @@ public class GntpNotificationBuilder {
 		this.context = context;
 		return this;
 	}
-	
+
 	public GntpNotification build() {
 		return new GntpNotificationDefaultImpl(applicationName, name, id, title, text, sticky, priority, iconImage, iconUri, coalescingId, callbackTarget, callbackRequested, context);
 	}

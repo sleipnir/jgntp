@@ -15,12 +15,12 @@
  */
 package com.google.code.jgntp.internal.io;
 
+import static org.jboss.netty.buffer.ChannelBuffers.*;
+
 import org.jboss.netty.buffer.*;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.channel.ChannelHandler.*;
 import org.jboss.netty.handler.codec.oneone.*;
-
-import static org.jboss.netty.buffer.ChannelBuffers.*;
 
 @Sharable
 public class DelimiterBasedFrameEncoder extends OneToOneEncoder {

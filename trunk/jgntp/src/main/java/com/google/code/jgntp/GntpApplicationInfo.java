@@ -22,9 +22,12 @@ import java.util.*;
 public interface GntpApplicationInfo {
 
 	String getName();
+
 	RenderedImage getIconImage();
+
 	URI getIconUri();
 
 	void addNotificationInfo(GntpNotificationInfo notificationInfo);
+
 	List<GntpNotificationInfo> getNotificationInfos();
 }

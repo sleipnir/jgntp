@@ -18,13 +18,17 @@ package com.google.code.jgntp;
 public interface GntpListener {
 
 	void onRegistrationSuccess();
-	
+
 	void onClickCallback(Object context);
+
 	void onCloseCallback(Object context);
+
 	void onTimeoutCallback(Object context);
 
 	void onRegistrationError(GntpErrorStatus status, String description);
+
 	void onNotificationError(GntpErrorStatus status, String description);
+
 	void onCommunicationError(Throwable t);
 
 }

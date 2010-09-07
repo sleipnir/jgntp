@@ -24,12 +24,13 @@ public interface GntpClient {
 	void register();
 
 	/**
-	 * @return True is this client is registered.
+	 * @return True if this client is registered.
 	 */
 	boolean isRegistered();
 
 	/**
-	 * Wait until this client is registered or the current thread is interrupted.
+	 * Wait until this client is registered or the current thread is
+	 * interrupted.
 	 * 
 	 * @throws InterruptedException If the current thread is interrupted.
 	 */
@@ -41,21 +42,22 @@ public interface GntpClient {
 	 * @param time The maximum time to wait.
 	 * @param unit The time unit of the {@code time} argument.
 	 * @throws InterruptedException If the current thread is interrupted.
-	 * @return True if this client registered successfully before the waiting time elapsed, false
-	 * otherwise.
+	 * @return True if this client registered successfully before the waiting
+	 *         time elapsed, false otherwise.
 	 */
 	boolean waitRegistration(long time, TimeUnit unit) throws InterruptedException;
 
 	/**
-	 * Send the given notification waiting uninterruptbly if this client is not registered yet.
-	 * Wait until this client is registered or is shutdown.
+	 * Send the given notification waiting uninterruptbly if this client is not
+	 * registered yet. Wait until this client is registered or is shutdown.
 	 * 
 	 * @param notification Notification to send.
 	 */
 	void notify(GntpNotification notification);
 
 	/**
-	 * Send the given notification waiting at most the given time if this client is not registered yet.
+	 * Send the given notification waiting at most the given time if this client
+	 * is not registered yet.
 	 * 
 	 * @param notification Notification to send.
 	 * @param time The maximum time to wait.

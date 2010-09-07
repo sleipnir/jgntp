@@ -39,11 +39,11 @@ public enum GntpErrorStatus {
 	public int getCode() {
 		return code;
 	}
-	
+
 	public static GntpErrorStatus parse(String s) {
 		return of(Integer.parseInt(s));
 	}
-	
+
 	public static GntpErrorStatus of(int i) {
 		for (GntpErrorStatus status : values()) {
 			if (status.getCode() == i) {
