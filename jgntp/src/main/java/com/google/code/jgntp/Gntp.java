@@ -45,7 +45,6 @@ public class Gntp {
 		this.applicationInfo = applicationInfo;
 		this.growlHost = DEFAULT_HOST;
 		this.growlPort = getPort();
-		this.executor = Executors.newCachedThreadPool();
 		this.retryTime = DEFAULT_RETRY_TIME;
 		this.retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
 		this.notificationRetryCount = DEFAULT_NOTIFICATION_RETRIES;
@@ -118,7 +117,8 @@ public class Gntp {
 		if (growlAddress == null) {
 			growlAddress = new InetSocketAddress(growlHost, growlPort);
 		}
-		return new NioGntpClient(applicationInfo, growlAddress, executor, listener, retryTime, retryTimeUnit, notificationRetryCount);
+		Executor executorToUse = executor == null ? Executors.newCachedThreadPool() : executor;
+		return new NioGntpClient(applicationInfo, growlAddress, executorToUse, listener, retryTime, retryTimeUnit, notificationRetryCount);
 	}
 	
 	private int getPort() {
