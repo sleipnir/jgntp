@@ -24,8 +24,8 @@ public class GntpNotifyMessage extends GntpMessage {
 	private final GntpNotification notification;
 	private final long contextId;
 
-	public GntpNotifyMessage(GntpNotification notification, long contextId) {
-		super(GntpMessageType.NOTIFY);
+	public GntpNotifyMessage(GntpNotification notification, long contextId, GntpPassword password) {
+		super(GntpMessageType.NOTIFY, password);
 		this.notification = notification;
 		this.contextId = contextId;
 	}

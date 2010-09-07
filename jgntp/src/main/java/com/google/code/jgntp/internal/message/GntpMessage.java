@@ -25,6 +25,7 @@ import java.util.*;
 
 import javax.imageio.*;
 
+import com.google.code.jgntp.*;
 import com.google.code.jgntp.internal.util.*;
 import com.google.common.base.*;
 import com.google.common.collect.*;
@@ -48,17 +49,19 @@ public abstract class GntpMessage {
 
 	private final GntpVersion version;
 	private final GntpMessageType type;
+	private final GntpPassword password;
 	private final Map<String, String> headers;
 	private final List<BinarySection> binarySections;
 	private final DateFormat dateFormat;
 
-	public GntpMessage(GntpMessageType type) {
-		this(GntpVersion.ONE_DOT_ZERO, type);
+	public GntpMessage(GntpMessageType type, GntpPassword password) {
+		this(GntpVersion.ONE_DOT_ZERO, type, password);
 	}
 
-	public GntpMessage(GntpVersion version, GntpMessageType type) {
+	public GntpMessage(GntpVersion version, GntpMessageType type, GntpPassword password) {
 		this.version = version;
 		this.type = type;
+		this.password = password;
 		headers = Maps.newHashMap();
 		binarySections = Lists.newArrayList();
 		dateFormat = new SimpleDateFormat();
@@ -77,6 +80,12 @@ public abstract class GntpMessage {
 		writer.append(PROTOCOL_ID).append('/').append(version.toString());
 		writer.append(' ').append(type.toString());
 		writer.append(' ').append(ENCRYPTION_ALGORITHM);
+
+		if (password != null) {
+			writer.append(' ').append(password.getKeyHashAlgorithm());
+			writer.append(':').append(Hex.toHexadecimal(password.getKey()));
+			writer.append('.').append(Hex.toHexadecimal(password.getSalt()));
+		}
 	}
 
 	public void appendHeader(GntpMessageHeader header, Object value, OutputStreamWriter writer) throws IOException {

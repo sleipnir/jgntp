@@ -35,6 +35,7 @@ public class NioGntpClient implements GntpClient {
 	private static final Logger logger = LoggerFactory.getLogger(NioGntpClient.class);
 
 	private final GntpApplicationInfo applicationInfo;
+	private final GntpPassword password;
 	private final long retryTime;
 	private final TimeUnit retryTimeUnit;
 	private final int notificationRetryCount;
@@ -49,8 +50,10 @@ public class NioGntpClient implements GntpClient {
 	private final Map<GntpNotification, Integer> notificationRetries;
 	private volatile boolean closed;
 
-	public NioGntpClient(GntpApplicationInfo applicationInfo, SocketAddress growlAddress, Executor executor, GntpListener listener, long retryTime, TimeUnit retryTimeUnit, int notificationRetryCount) {
+	public NioGntpClient(GntpApplicationInfo applicationInfo, SocketAddress growlAddress, Executor executor, GntpListener listener, GntpPassword password, long retryTime, TimeUnit retryTimeUnit,
+			int notificationRetryCount) {
 		this.applicationInfo = applicationInfo;
+		this.password = password;
 		this.retryTime = retryTime;
 		this.retryTimeUnit = retryTimeUnit;
 		this.notificationRetryCount = notificationRetryCount;
@@ -79,7 +82,7 @@ public class NioGntpClient implements GntpClient {
 			public void operationComplete(ChannelFuture future) throws Exception {
 				if (future.isSuccess()) {
 					channelGroup.add(future.getChannel());
-					GntpMessage message = new GntpRegisterMessage(applicationInfo);
+					GntpMessage message = new GntpRegisterMessage(applicationInfo, password);
 					future.getChannel().write(message);
 				} else {
 					if (retryExecutorService != null) {
@@ -174,7 +177,7 @@ public class NioGntpClient implements GntpClient {
 							contextId = -1;
 						}
 
-						GntpMessage message = new GntpNotifyMessage(notification, contextId);
+						GntpMessage message = new GntpNotifyMessage(notification, contextId, password);
 						future.getChannel().write(message);
 					} else {
 						if (retryExecutorService != null) {
