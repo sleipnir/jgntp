@@ -32,7 +32,7 @@ public class GntpNotifyMessage extends GntpMessage {
 
 	@Override
 	public void append(OutputStream output) throws IOException {
-		OutputStreamWriter writer = new OutputStreamWriter(output, ENCODING);
+		GntpMessageWriter writer = getWriter(output);
 		appendStatusLine(writer);
 		appendSeparator(writer);
 
@@ -86,10 +86,9 @@ public class GntpNotifyMessage extends GntpMessage {
 			appendHeader(GntpMessageHeader.NOTIFICATION_CALLBACK_CONTEXT_TYPE, "int", writer);
 			appendSeparator(writer);
 		}
+		writer.finishHeaders();
 
-		writer.flush();
-
-		appendBinarySections(output);
+		appendBinarySections(writer);
 		clearBinarySections();
 	}
 }

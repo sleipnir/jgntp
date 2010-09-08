@@ -10,7 +10,7 @@ public class GntpPasswordDefaultImpl implements GntpPassword {
 
 	public static final String DEFAULT_RANDOM_SALT_ALGORITHM = "SHA1PRNG";
 	public static final int DEFAULT_SALT_SIZE = 16;
-	public static final String DEFAULT_KEY_HASH_ALGORITHM = "SHA1";
+	public static final String DEFAULT_KEY_HASH_ALGORITHM = "SHA-512";
 
 	private final byte[] key;
 	private final byte[] salt;
@@ -29,7 +29,7 @@ public class GntpPasswordDefaultImpl implements GntpPassword {
 
 	@Override
 	public String getKeyHashAlgorithm() {
-		return DEFAULT_KEY_HASH_ALGORITHM;
+		return DEFAULT_KEY_HASH_ALGORITHM.replaceAll("-", "");
 	}
 
 	@Override

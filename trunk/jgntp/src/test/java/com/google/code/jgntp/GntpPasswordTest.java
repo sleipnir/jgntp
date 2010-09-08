@@ -38,10 +38,10 @@ public class GntpPasswordTest {
 		SecretKey secretKey = keyFactory.generateSecret(new DESKeySpec(key));
 		Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
 		cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+		System.out.println(Hex.toHexadecimal(cipher.getIV()));
 		byte[] encryptedPassword = cipher.doFinal(array);
 
 		System.out.println(Arrays.toString(encryptedPassword));
-		System.out.println(Hex.toHexadecimal(cipher.getIV()));
 	}
 
 }
