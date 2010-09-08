@@ -59,7 +59,7 @@ public abstract class GntpMessage {
 	public GntpMessage(GntpMessageType type, GntpPassword password) {
 		this.type = type;
 		this.password = password;
-		this.encrypt = false; // Message encryption is not supported
+		this.encrypt = true; // Message encryption is not supported
 		headers = Maps.newHashMap();
 		binarySections = Lists.newArrayList();
 		dateFormat = new SimpleDateFormat(DATE_TIME_FORMAT);

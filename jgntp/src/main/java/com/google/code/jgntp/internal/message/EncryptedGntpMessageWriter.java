@@ -2,6 +2,7 @@ package com.google.code.jgntp.internal.message;
 
 import java.io.*;
 import java.security.*;
+import java.util.*;
 
 import javax.crypto.*;
 import javax.crypto.spec.*;
@@ -38,9 +39,11 @@ public class EncryptedGntpMessageWriter implements GntpMessageWriter {
 		this.password = password;
 
 		try {
+			byte[] keyToEncrypt = Arrays.copyOf(password.getKey(), 8);
+
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(DEFAULT_ALGORITHM);
-			secretKey = keyFactory.generateSecret(new DESKeySpec(password.getKey()));
-			iv = new IvParameterSpec(secretKey.getEncoded());
+			secretKey = keyFactory.generateSecret(new DESKeySpec(keyToEncrypt));
+			iv = new IvParameterSpec(keyToEncrypt);
 
 			cipher = Cipher.getInstance(DEFAULT_TRANSFORMATION);
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);

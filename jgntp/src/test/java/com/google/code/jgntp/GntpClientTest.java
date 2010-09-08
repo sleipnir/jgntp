@@ -30,9 +30,9 @@ public class GntpClientTest {
 
 	@Test
 	public void test() throws Exception {
-		GntpApplicationInfo info = Gntp.appInfo("Test").icon(ImageIO.read(getClass().getResourceAsStream("icon.png"))).build();
-		GntpNotificationInfo notif1 = Gntp.notificationInfo(info, "Notify 1").icon(ImageIO.read(getClass().getResourceAsStream("icon.png"))).build();
-		GntpNotificationInfo notif2 = Gntp.notificationInfo(info, "Notify 2").icon(ImageIO.read(getClass().getResourceAsStream("sms.png"))).build();
+		GntpApplicationInfo info = Gntp.appInfo("Test").build();
+//		GntpNotificationInfo notif1 = Gntp.notificationInfo(info, "Notify 1").icon(ImageIO.read(getClass().getResourceAsStream("icon.png"))).build();
+//		GntpNotificationInfo notif2 = Gntp.notificationInfo(info, "Notify 2").icon(ImageIO.read(getClass().getResourceAsStream("sms.png"))).build();
 
 		GntpClient client = Gntp.client(info).withPassword("test").withListener(new GntpListener() {
 			@Override
@@ -72,8 +72,8 @@ public class GntpClientTest {
 		}).build();
 
 		client.register();
-		client.notify(Gntp.notification(notif1, "Title").text("Message").withCallback().context(12345).build(), 5, SECONDS);
-		client.notify(Gntp.notification(notif2, "Title 2").text("Message 2").callbackTarget(URI.create("http://slashdot.org/")).build(), 5, SECONDS);
+//		client.notify(Gntp.notification(notif1, "Title").text("Message").withCallback().context(12345).build(), 5, SECONDS);
+//		client.notify(Gntp.notification(notif2, "Title 2").text("Message 2").callbackTarget(URI.create("http://slashdot.org/")).build(), 5, SECONDS);
 		SECONDS.sleep(5);
 		client.shutdown(50, SECONDS);
 	}
