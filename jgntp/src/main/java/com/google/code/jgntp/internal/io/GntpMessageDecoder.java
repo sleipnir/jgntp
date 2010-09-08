@@ -22,6 +22,7 @@ import org.jboss.netty.handler.codec.oneone.*;
 import org.slf4j.*;
 
 import com.google.code.jgntp.internal.message.*;
+import com.google.code.jgntp.internal.message.read.*;
 
 @Sharable
 public class GntpMessageDecoder extends OneToOneDecoder {

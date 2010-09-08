@@ -29,8 +29,9 @@ public interface GntpClient {
 	boolean isRegistered();
 
 	/**
-	 * Wait until this client is registered or the current thread is
+	 * Wait until this client is registered or shutted down or the current thread is
 	 * interrupted.
+	 * Prefer a timed wait if you can.
 	 * 
 	 * @throws InterruptedException If the current thread is interrupted.
 	 */

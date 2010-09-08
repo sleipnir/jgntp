@@ -28,6 +28,7 @@ import org.slf4j.*;
 
 import com.google.code.jgntp.*;
 import com.google.code.jgntp.internal.message.*;
+import com.google.common.base.*;
 import com.google.common.collect.*;
 
 public class NioGntpClient implements GntpClient {
@@ -36,6 +37,7 @@ public class NioGntpClient implements GntpClient {
 
 	private final GntpApplicationInfo applicationInfo;
 	private final GntpPassword password;
+	private final boolean encrypted;
 	private final long retryTime;
 	private final TimeUnit retryTimeUnit;
 	private final int notificationRetryCount;
@@ -50,10 +52,22 @@ public class NioGntpClient implements GntpClient {
 	private final Map<GntpNotification, Integer> notificationRetries;
 	private volatile boolean closed;
 
-	public NioGntpClient(GntpApplicationInfo applicationInfo, SocketAddress growlAddress, Executor executor, GntpListener listener, GntpPassword password, long retryTime, TimeUnit retryTimeUnit,
-			int notificationRetryCount) {
+	public NioGntpClient(GntpApplicationInfo applicationInfo, SocketAddress growlAddress, Executor executor, GntpListener listener, GntpPassword password, boolean encrypted, long retryTime,
+							TimeUnit retryTimeUnit, int notificationRetryCount) {
+		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
+		Preconditions.checkNotNull(growlAddress, "Address must not be null");
+		Preconditions.checkNotNull(executor, "Executor must not be null");
+		if (retryTime > 0) {
+			Preconditions.checkNotNull(retryTimeUnit, "Retry time unit must not be null");
+		}
+		if (encrypted) {
+			Preconditions.checkNotNull(password, "Password must not be null if sending encrypted messages");
+		}
+		Preconditions.checkArgument(notificationRetryCount >= 0, "Notification retries must be equal or greater than zero");
+
 		this.applicationInfo = applicationInfo;
 		this.password = password;
+		this.encrypted = encrypted;
 		this.retryTime = retryTime;
 		this.retryTimeUnit = retryTimeUnit;
 		this.notificationRetryCount = notificationRetryCount;
@@ -82,7 +96,7 @@ public class NioGntpClient implements GntpClient {
 			public void operationComplete(ChannelFuture future) throws Exception {
 				if (future.isSuccess()) {
 					channelGroup.add(future.getChannel());
-					GntpMessage message = new GntpRegisterMessage(applicationInfo, password);
+					GntpMessage message = new GntpRegisterMessage(applicationInfo, password, encrypted);
 					future.getChannel().write(message);
 				} else {
 					if (retryExecutorService != null) {
@@ -177,7 +191,7 @@ public class NioGntpClient implements GntpClient {
 							contextId = -1;
 						}
 
-						GntpMessage message = new GntpNotifyMessage(notification, contextId, password);
+						GntpMessage message = new GntpNotifyMessage(notification, contextId, password, encrypted);
 						future.getChannel().write(message);
 					} else {
 						if (retryExecutorService != null) {

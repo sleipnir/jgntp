@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.code.jgntp.internal.message;
+package com.google.code.jgntp.internal.message.write;
 
 import java.io.*;
 
-public abstract class GntpMessageResponse extends GntpMessage {
+import com.google.code.jgntp.*;
+import com.google.code.jgntp.internal.message.*;
+import com.google.code.jgntp.internal.message.GntpMessage.*;
 
-	private final GntpMessageType respondingType;
+public interface GntpMessageWriter {
 
-	public GntpMessageResponse(GntpMessageType type, GntpMessageType respondingType) {
-		super(type, null, false);
-		this.respondingType = respondingType;
-	}
-
-	public GntpMessageType getRespondingType() {
-		return respondingType;
-	}
-
-	@Override
-	public void append(OutputStream output) throws IOException {
-		throw new UnsupportedOperationException("This is a response message");
-	}
+	void prepare(OutputStream output, GntpPassword password);
+	void writeStatusLine(GntpMessageType type) throws IOException;
+	
+	void startHeaders() throws IOException;
+	void writeHeaderLine(String line) throws IOException;
+	void finishHeaders() throws IOException;
+	
+	void writeBinarySection(BinarySection binarySection) throws IOException;
+	
+	void writeSeparator() throws IOException;
 
 }

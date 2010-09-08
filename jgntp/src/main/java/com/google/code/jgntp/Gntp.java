@@ -38,6 +38,7 @@ public class Gntp {
 	private Executor executor;
 	private GntpListener listener;
 	private GntpPassword password;
+	private boolean encrypted;
 	private long retryTime;
 	private TimeUnit retryTimeUnit;
 	private int notificationRetryCount;
@@ -89,12 +90,12 @@ public class Gntp {
 		return this;
 	}
 
-	public Gntp withExecutor(Executor executor) {
+	public Gntp executor(Executor executor) {
 		this.executor = executor;
 		return this;
 	}
 
-	public Gntp withListener(GntpListener listener) {
+	public Gntp listener(GntpListener listener) {
 		this.listener = listener;
 		return this;
 	}
@@ -109,16 +110,32 @@ public class Gntp {
 		return this;
 	}
 
+	public Gntp secure(String password) {
+		withPassword(password);
+		this.encrypted = true;
+		return this;
+	}
+
+	public Gntp secure(GntpPassword password) {
+		withPassword(password);
+		this.encrypted = true;
+		return this;
+	}
+
+	public Gntp insecure() {
+		this.encrypted = false;
+		return this;
+	}
+
 	public Gntp retryingAtFixedRate(long time, TimeUnit unit) {
-		Preconditions.checkArgument(time > 0, "Retrying time must be greater than zero");
-		Preconditions.checkArgument(unit != null, "Retrying time unit must not be null");
+		Preconditions.checkArgument(time > 0, "Retry time must be greater than zero");
+		Preconditions.checkArgument(unit != null, "Retry time unit must not be null");
 		retryTime = time;
 		retryTimeUnit = unit;
 		return this;
 	}
 
 	public Gntp retryingNotificationsAtMost(int notificationRetryCount) {
-		Preconditions.checkArgument(notificationRetryCount > 0, "Notification retries must be greater than zero");
 		this.notificationRetryCount = notificationRetryCount;
 		return this;
 	}
@@ -126,6 +143,7 @@ public class Gntp {
 	public Gntp withoutRetry() {
 		retryTime = 0;
 		retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
+		notificationRetryCount = 0;
 		return this;
 	}
 
@@ -134,7 +152,7 @@ public class Gntp {
 			growlAddress = new InetSocketAddress(growlHost, growlPort);
 		}
 		Executor executorToUse = executor == null ? Executors.newCachedThreadPool() : executor;
-		return new NioGntpClient(applicationInfo, growlAddress, executorToUse, listener, password, retryTime, retryTimeUnit, notificationRetryCount);
+		return new NioGntpClient(applicationInfo, growlAddress, executorToUse, listener, password, encrypted, retryTime, retryTimeUnit, notificationRetryCount);
 	}
 
 	private int getPort() {

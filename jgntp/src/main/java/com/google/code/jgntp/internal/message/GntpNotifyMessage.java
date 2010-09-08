@@ -18,14 +18,15 @@ package com.google.code.jgntp.internal.message;
 import java.io.*;
 
 import com.google.code.jgntp.*;
+import com.google.code.jgntp.internal.message.write.*;
 
 public class GntpNotifyMessage extends GntpMessage {
 
 	private final GntpNotification notification;
 	private final long contextId;
 
-	public GntpNotifyMessage(GntpNotification notification, long contextId, GntpPassword password) {
-		super(GntpMessageType.NOTIFY, password);
+	public GntpNotifyMessage(GntpNotification notification, long contextId, GntpPassword password, boolean encrypt) {
+		super(GntpMessageType.NOTIFY, password, encrypt);
 		this.notification = notification;
 		this.contextId = contextId;
 	}
