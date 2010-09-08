@@ -18,6 +18,7 @@ package com.google.code.jgntp;
 public interface GntpPassword {
 
 	byte[] getKey();
+	byte[] getKeyHash();
 	String getKeyHashAlgorithm();
 	byte[] getSalt();
 

@@ -36,6 +36,8 @@ public class GntpNotifyMessage extends GntpMessage {
 		appendStatusLine(writer);
 		appendSeparator(writer);
 
+		writer.startHeaders();
+
 		appendHeader(GntpMessageHeader.APPLICATION_NAME, notification.getApplicationName(), writer);
 		appendSeparator(writer);
 
