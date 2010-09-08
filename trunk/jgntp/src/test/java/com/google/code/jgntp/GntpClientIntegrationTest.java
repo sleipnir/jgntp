@@ -34,25 +34,30 @@ public class GntpClientIntegrationTest {
 		GntpNotificationInfo notif1 = Gntp.notificationInfo(info, "Notify 1").icon(ImageIO.read(getClass().getResourceAsStream("icon.png"))).build();
 		GntpNotificationInfo notif2 = Gntp.notificationInfo(info, "Notify 2").icon(ImageIO.read(getClass().getResourceAsStream("sms.png"))).build();
 
-		GntpClient client = Gntp.client(info).secure("test").listener(new GntpListener() {
+		GntpClient client = Gntp.client(info).withPassword("test").listener(new GntpListener() {
 			@Override
 			public void onRegistrationSuccess() {
 				logger.info("Registered");
 			}
 
 			@Override
-			public void onClickCallback(Object context) {
-				logger.info("Click callback: " + context);
+			public void onNotificationSuccess(GntpNotification notification) {
+				logger.info("Notification success: " + notification);
 			}
 
 			@Override
-			public void onCloseCallback(Object context) {
-				logger.info("Close callback: " + context);
+			public void onClickCallback(GntpNotification notification) {
+				logger.info("Click callback: " + notification.getContext());
 			}
 
 			@Override
-			public void onTimeoutCallback(Object context) {
-				logger.info("Timeout callback: " + context);
+			public void onCloseCallback(GntpNotification notification) {
+				logger.info("Close callback: " + notification.getContext());
+			}
+
+			@Override
+			public void onTimeoutCallback(GntpNotification notification) {
+				logger.info("Timeout callback: " + notification.getContext());
 			}
 
 			@Override
@@ -61,7 +66,7 @@ public class GntpClientIntegrationTest {
 			}
 
 			@Override
-			public void onNotificationError(GntpErrorStatus status, String description) {
+			public void onNotificationError(GntpNotification notification, GntpErrorStatus status, String description) {
 				logger.info("Notification Error: " + status + " - desc: " + description);
 			}
 

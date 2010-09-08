@@ -25,8 +25,8 @@ public class GntpCallbackMessage extends GntpMessageResponse {
 	private final String contextType;
 	private final Date timestamp;
 
-	public GntpCallbackMessage(String notificationId, GntpCallbackResult callbackResult, String context, String contextType, Date timestamp) {
-		super(GntpMessageType.CALLBACK, GntpMessageType.NOTIFY);
+	public GntpCallbackMessage(long internalNotificationId, String notificationId, GntpCallbackResult callbackResult, String context, String contextType, Date timestamp) {
+		super(GntpMessageType.CALLBACK, GntpMessageType.NOTIFY, internalNotificationId);
 		this.notificationId = notificationId;
 		this.callbackResult = callbackResult;
 		this.context = context;

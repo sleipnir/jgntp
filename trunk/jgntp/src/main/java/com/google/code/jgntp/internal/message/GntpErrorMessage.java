@@ -22,8 +22,8 @@ public class GntpErrorMessage extends GntpMessageResponse {
 	private final GntpErrorStatus status;
 	private final String description;
 
-	public GntpErrorMessage(GntpMessageType respondingType, GntpErrorStatus status, String description) {
-		super(GntpMessageType.ERROR, respondingType);
+	public GntpErrorMessage(long internalNotificationId, GntpMessageType respondingType, GntpErrorStatus status, String description) {
+		super(GntpMessageType.ERROR, respondingType, internalNotificationId);
 		this.status = status;
 		this.description = description;
 	}

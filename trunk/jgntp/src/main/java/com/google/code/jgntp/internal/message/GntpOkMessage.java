@@ -19,8 +19,8 @@ public class GntpOkMessage extends GntpMessageResponse {
 
 	private final String notificationId;
 
-	public GntpOkMessage(GntpMessageType respondingType, String notificationId) {
-		super(GntpMessageType.OK, respondingType);
+	public GntpOkMessage(long internalNotificationId, GntpMessageType respondingType, String notificationId) {
+		super(GntpMessageType.OK, respondingType, internalNotificationId);
 		this.notificationId = notificationId;
 	}
 

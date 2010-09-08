@@ -47,8 +47,9 @@ public class NioGntpClient implements GntpClient {
 	private final CountDownLatch registrationLatch;
 	private final ScheduledExecutorService retryExecutorService;
 
-	private final AtomicLong contextIdGenerator;
-	private final Map<Long, Object> callbackContexts;
+	private final AtomicLong notificationIdGenerator;
+	private final BiMap<Long, Object> notificationsSent;
+
 	private final Map<GntpNotification, Integer> notificationRetries;
 	private volatile boolean closed;
 
@@ -83,8 +84,13 @@ public class NioGntpClient implements GntpClient {
 		bootstrap.setOption("tcpNoDelay", true);
 		bootstrap.setOption("remoteAddress", growlAddress);
 		channelGroup = new DefaultChannelGroup("jgntp");
-		contextIdGenerator = new AtomicLong();
-		callbackContexts = Maps.newConcurrentMap();
+
+		notificationIdGenerator = new AtomicLong();
+		// no need to sync on this map because notificationIdGenerator guarantees ID uniqueness
+		// and there is only one way for alterations to this map occur for any notification
+		// see GntpChannelHandler for details
+		notificationsSent = HashBiMap.create();
+
 		registrationLatch = new CountDownLatch(1);
 		notificationRetries = Maps.newConcurrentMap();
 	}
@@ -168,8 +174,8 @@ public class NioGntpClient implements GntpClient {
 		registrationLatch.countDown();
 	}
 
-	Map<Long, Object> getCallbackContexts() {
-		return callbackContexts;
+	BiMap<Long, Object> getNotificationsSent() {
+		return notificationsSent;
 	}
 
 	protected void notifyInternal(final GntpNotification notification) {
@@ -181,17 +187,10 @@ public class NioGntpClient implements GntpClient {
 					if (future.isSuccess()) {
 						channelGroup.add(future.getChannel());
 
-						long contextId;
-						if (notification.isCallbackRequested()) {
-							contextId = contextIdGenerator.getAndIncrement();
-							if (notification.getContext() != null) {
-								callbackContexts.put(contextId, notification.getContext());
-							}
-						} else {
-							contextId = -1;
-						}
+						long notificationId = notificationIdGenerator.getAndIncrement();
+						notificationsSent.put(notificationId, notification);
 
-						GntpMessage message = new GntpNotifyMessage(notification, contextId, password, encrypted);
+						GntpMessage message = new GntpNotifyMessage(notification, notificationId, password, encrypted);
 						future.getChannel().write(message);
 					} else {
 						if (retryExecutorService != null) {
@@ -212,9 +211,11 @@ public class NioGntpClient implements GntpClient {
 								notificationRetries.remove(notification);
 							}
 						}
+						notificationsSent.inverse().remove(notification);
 					}
 				}
 			});
 		}
 	}
+	
 }

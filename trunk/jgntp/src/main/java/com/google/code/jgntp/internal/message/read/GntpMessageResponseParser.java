@@ -65,7 +65,7 @@ public class GntpMessageResponseParser {
 
 	protected GntpOkMessage createOkMessage(Map<String, String> headers) {
 		String notificationId = GntpMessageHeader.NOTIFICATION_ID.getValueInMap(headers);
-		return new GntpOkMessage(getRespondingType(headers), notificationId);
+		return new GntpOkMessage(getInternalNotificationId(headers), getRespondingType(headers), notificationId);
 	}
 
 	protected GntpCallbackMessage createCallbackMessage(Map<String, String> headers) {
@@ -86,14 +86,19 @@ public class GntpMessageResponseParser {
 			}
 		}
 
-		return new GntpCallbackMessage(notificationId, callbackResult, context, contextType, timestamp);
+		return new GntpCallbackMessage(getInternalNotificationId(headers), notificationId, callbackResult, context, contextType, timestamp);
 	}
 
 	protected GntpErrorMessage createErrorMessage(Map<String, String> headers) {
 		String code = GntpMessageHeader.ERROR_CODE.getRequiredValueInMap(headers);
 		String description = GntpMessageHeader.ERROR_DESCRIPTION.getRequiredValueInMap(headers);
 		GntpErrorStatus errorStatus = GntpErrorStatus.parse(code);
-		return new GntpErrorMessage(getRespondingType(headers), errorStatus, description);
+		return new GntpErrorMessage(getInternalNotificationId(headers), getRespondingType(headers), errorStatus, description);
+	}
+
+	protected long getInternalNotificationId(Map<String, String> headers) {
+		String value = GntpMessageHeader.NOTIFICATION_INTERNAL_ID.getValueInMap(headers);
+		return value == null ? -1 : Long.parseLong(value);
 	}
 
 	protected GntpMessageType getRespondingType(Map<String, String> headers) {

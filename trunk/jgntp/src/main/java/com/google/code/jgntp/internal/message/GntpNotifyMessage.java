@@ -23,12 +23,12 @@ import com.google.code.jgntp.internal.message.write.*;
 public class GntpNotifyMessage extends GntpMessage {
 
 	private final GntpNotification notification;
-	private final long contextId;
+	private final long notificationId;
 
-	public GntpNotifyMessage(GntpNotification notification, long contextId, GntpPassword password, boolean encrypt) {
+	public GntpNotifyMessage(GntpNotification notification, long notificationId, GntpPassword password, boolean encrypt) {
 		super(GntpMessageType.NOTIFY, password, encrypt);
 		this.notification = notification;
-		this.contextId = contextId;
+		this.notificationId = notificationId;
 	}
 
 	@Override
@@ -83,12 +83,16 @@ public class GntpNotifyMessage extends GntpMessage {
 		}
 
 		if (notification.isCallbackRequested()) {
-			appendHeader(GntpMessageHeader.NOTIFICATION_CALLBACK_CONTEXT, contextId, writer);
+			appendHeader(GntpMessageHeader.NOTIFICATION_CALLBACK_CONTEXT, notificationId, writer);
 			appendSeparator(writer);
 
 			appendHeader(GntpMessageHeader.NOTIFICATION_CALLBACK_CONTEXT_TYPE, "int", writer);
 			appendSeparator(writer);
 		}
+
+		appendHeader(GntpMessageHeader.NOTIFICATION_INTERNAL_ID, notificationId, writer);
+		appendSeparator(writer);
+		
 		writer.finishHeaders();
 
 		appendBinarySections(writer);

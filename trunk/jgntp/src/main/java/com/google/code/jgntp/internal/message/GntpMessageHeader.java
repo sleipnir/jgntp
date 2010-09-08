@@ -43,6 +43,13 @@ public enum GntpMessageHeader {
 		}
 	},
 
+	NOTIFICATION_INTERNAL_ID {
+		@Override
+		public String toString() {
+			return "Data-Internal-Notification-ID";
+		}
+	},
+
 	NOTIFICATION_ID {
 		@Override
 		public String toString() {

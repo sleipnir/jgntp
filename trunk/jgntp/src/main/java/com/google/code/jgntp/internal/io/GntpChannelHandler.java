@@ -45,28 +45,41 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 		Preconditions.checkState(message instanceof GntpOkMessage || message instanceof GntpCallbackMessage || message instanceof GntpErrorMessage);
 
 		if (gntpClient.isRegistered()) {
-			if (message instanceof GntpCallbackMessage) {
+			GntpNotification notification = (GntpNotification)gntpClient.getNotificationsSent().get(message.getInternalNotificationId());
+			if (message instanceof GntpOkMessage) {
+				try {
+					if (listener != null) {
+						listener.onNotificationSuccess(notification);
+					}
+				} finally {
+					if (!notification.isCallbackRequested()) {
+						gntpClient.getNotificationsSent().remove(message.getInternalNotificationId());
+					}
+				}
+			} else if (message instanceof GntpCallbackMessage) {
+				gntpClient.getNotificationsSent().remove(message.getInternalNotificationId());
 				if (listener == null) {
 					throw new IllegalStateException("A GntpListener must be set in GntpClient to be able to receive callbacks");
 				}
 				GntpCallbackMessage callbackMessage = (GntpCallbackMessage) message;
-				long contextId = Long.parseLong(callbackMessage.getContext());
-				Object context = gntpClient.getCallbackContexts().remove(contextId);
 				switch (callbackMessage.getCallbackResult()) {
 					case CLICK:
-						listener.onClickCallback(context);
+						listener.onClickCallback(notification);
 						break;
 					case CLOSE:
-						listener.onCloseCallback(context);
+						listener.onCloseCallback(notification);
 						break;
 					case TIMEOUT:
-						listener.onTimeoutCallback(context);
+						listener.onTimeoutCallback(notification);
 						break;
 					default:
 						throw new IllegalStateException("Unknown callback result: " + callbackMessage.getCallbackResult());
 				}
 			} else if (message instanceof GntpErrorMessage) {
-				handleErrorMessage((GntpErrorMessage) message);
+				if (listener != null) {
+					GntpErrorMessage errorMessage = (GntpErrorMessage) message;
+					listener.onNotificationError(notification, errorMessage.getStatus(), errorMessage.getDescription());
+				}
 			}
 		} else {
 			if (message instanceof GntpOkMessage) {
@@ -78,7 +91,10 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 					gntpClient.setRegistered();
 				}
 			} else if (message instanceof GntpErrorMessage) {
-				handleErrorMessage((GntpErrorMessage) message);
+				if (listener != null) {
+					GntpErrorMessage errorMessage = (GntpErrorMessage) message;
+					listener.onRegistrationError(errorMessage.getStatus(), errorMessage.getDescription());
+				}	
 			}
 		}
 	}
@@ -96,9 +112,4 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 		}
 	}
 
-	protected void handleErrorMessage(GntpErrorMessage message) {
-		if (listener != null) {
-			listener.onRegistrationError(message.getStatus(), message.getDescription());
-		}
-	}
 }
