@@ -28,18 +28,25 @@ public class GntpPasswordDefaultImpl implements GntpPassword {
 	public static final String DEFAULT_KEY_HASH_ALGORITHM = "SHA-512";
 
 	private final byte[] key;
+	private final byte[] keyHash;
 	private final byte[] salt;
 
 	public GntpPasswordDefaultImpl(String textPassword) {
 		byte[] passwordBytes = textPassword.getBytes(Charsets.UTF_8);
 		salt = getSalt(DEFAULT_RANDOM_SALT_ALGORITHM);
 		byte[] keyBasis = getKeyBasis(passwordBytes, salt);
-		key = getHashedKey(keyBasis, DEFAULT_KEY_HASH_ALGORITHM);
+		key = hash(keyBasis, DEFAULT_KEY_HASH_ALGORITHM);
+		keyHash = hash(key, DEFAULT_KEY_HASH_ALGORITHM);
 	}
 
 	@Override
 	public byte[] getKey() {
 		return Arrays.copyOf(key, key.length);
+	}
+
+	@Override
+	public byte[] getKeyHash() {
+		return Arrays.copyOf(keyHash, keyHash.length);
 	}
 
 	@Override
@@ -73,10 +80,9 @@ public class GntpPasswordDefaultImpl implements GntpPassword {
 		return keyBasis;
 	}
 
-	protected byte[] getHashedKey(byte[] keyBasis, String hashAlgorithm) {
+	protected byte[] hash(byte[] key, String hashAlgorithm) {
 		try {
 			MessageDigest messageDigest = MessageDigest.getInstance(hashAlgorithm);
-			byte[] key = messageDigest.digest(keyBasis);
 			return messageDigest.digest(key);
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);

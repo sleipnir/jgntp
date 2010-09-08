@@ -75,7 +75,7 @@ public class EncryptedGntpMessageWriter implements GntpMessageWriter {
 
 		if (password != null) {
 			writer.append(' ').append(password.getKeyHashAlgorithm());
-			writer.append(':').append(Hex.toHexadecimal(password.getKey()));
+			writer.append(':').append(Hex.toHexadecimal(password.getKeyHash()));
 			writer.append('.').append(Hex.toHexadecimal(password.getSalt()));
 		}
 		writer.flush();
