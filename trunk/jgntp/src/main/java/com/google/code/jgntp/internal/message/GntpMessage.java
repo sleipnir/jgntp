@@ -26,6 +26,7 @@ import java.util.*;
 import javax.imageio.*;
 
 import com.google.code.jgntp.*;
+import com.google.code.jgntp.internal.message.write.*;
 import com.google.code.jgntp.internal.util.*;
 import com.google.common.base.*;
 import com.google.common.collect.*;
@@ -56,10 +57,10 @@ public abstract class GntpMessage {
 
 	private final StringBuilder buffer;
 	
-	public GntpMessage(GntpMessageType type, GntpPassword password) {
+	public GntpMessage(GntpMessageType type, GntpPassword password, boolean encrypt) {
 		this.type = type;
 		this.password = password;
-		this.encrypt = true; // Message encryption is not supported
+		this.encrypt = encrypt;
 		headers = Maps.newHashMap();
 		binarySections = Lists.newArrayList();
 		dateFormat = new SimpleDateFormat(DATE_TIME_FORMAT);
@@ -174,7 +175,7 @@ public abstract class GntpMessage {
 				digest = MessageDigest.getInstance(BINARY_HASH_FUNCTION);
 				digest.update(data);
 				byte[] digested = digest.digest();
-				id = Base64.encodeBytes(digested);
+				id = Hex.toHexadecimal(digested);
 			} catch (NoSuchAlgorithmException e) {
 				throw new RuntimeException(e);
 			}

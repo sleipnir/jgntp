@@ -18,13 +18,14 @@ package com.google.code.jgntp.internal.message;
 import java.io.*;
 
 import com.google.code.jgntp.*;
+import com.google.code.jgntp.internal.message.write.*;
 
 public class GntpRegisterMessage extends GntpMessage {
 
 	private final GntpApplicationInfo info;
 
-	public GntpRegisterMessage(GntpApplicationInfo applicationInfo, GntpPassword password) {
-		super(GntpMessageType.REGISTER, password);
+	public GntpRegisterMessage(GntpApplicationInfo applicationInfo, GntpPassword password, boolean encrypt) {
+		super(GntpMessageType.REGISTER, password, encrypt);
 		info = applicationInfo;
 	}
 

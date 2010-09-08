@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.code.jgntp.internal.message;
+package com.google.code.jgntp.internal.message.write;
 
 import java.io.*;
 
-import com.google.code.jgntp.*;
 import com.google.code.jgntp.internal.message.GntpMessage.*;
 
-public interface GntpMessageWriter {
+public class ClearTextGntpMessageWriter extends AbstractGntpMessageWriter {
 
-	void prepare(OutputStream output, GntpPassword password);
-	void writeStatusLine(GntpMessageType type) throws IOException;
-	
-	void startHeaders() throws IOException;
-	void writeHeaderLine(String line) throws IOException;
-	void finishHeaders() throws IOException;
-	
-	void writeBinarySection(BinarySection binarySection) throws IOException;
-	
-	void writeSeparator() throws IOException;
+	public static final String NONE_ENCRYPTION_ALGORITHM = "NONE";
+
+	@Override
+	protected void writeEncryptionSpec() throws IOException {
+		writer.append(NONE_ENCRYPTION_ALGORITHM);
+	}
+
+	@Override
+	protected byte[] getDataForBinarySection(BinarySection binarySection) {
+		return binarySection.getData();
+	}
 
 }

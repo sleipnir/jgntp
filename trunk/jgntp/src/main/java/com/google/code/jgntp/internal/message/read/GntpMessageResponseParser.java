@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.code.jgntp.internal.message;
+package com.google.code.jgntp.internal.message.read;
 
 import java.text.*;
 import java.util.*;
 
 import com.google.code.jgntp.*;
+import com.google.code.jgntp.internal.message.*;
 import com.google.common.base.*;
 import com.google.common.collect.*;
 
