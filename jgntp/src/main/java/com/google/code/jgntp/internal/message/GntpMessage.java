@@ -126,8 +126,7 @@ public abstract class GntpMessage {
 			if (!ImageIO.write(image, IMAGE_FORMAT, output)) {
 				throw new IllegalStateException("Could not read icon data");
 			}
-			GntpId id = addBinary(output.toByteArray());
-			appendHeader(header, id, writer);
+			appendHeader(header, output.toByteArray(), writer);
 		}
 		return true;
 	}
