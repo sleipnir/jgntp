@@ -30,9 +30,11 @@ public class GntpRegisterMessage extends GntpMessage {
 
 	@Override
 	public void append(OutputStream output) throws IOException {
-		OutputStreamWriter writer = new OutputStreamWriter(output, ENCODING);
+		GntpMessageWriter writer = getWriter(output);
 		appendStatusLine(writer);
 		appendSeparator(writer);
+		
+		writer.startHeaders();
 
 		appendHeader(GntpMessageHeader.APPLICATION_NAME, info.getName(), writer);
 		appendSeparator(writer);
@@ -64,9 +66,9 @@ public class GntpRegisterMessage extends GntpMessage {
 
 			appendSeparator(writer);
 		}
-		writer.flush();
+		writer.finishHeaders();
 
-		appendBinarySections(output);
+		appendBinarySections(writer);
 		clearBinarySections();
 	}
 }

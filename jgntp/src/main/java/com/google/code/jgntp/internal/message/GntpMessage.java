@@ -37,7 +37,7 @@ public abstract class GntpMessage {
 	public static final String SEPARATOR = "\r\n";
 	public static final char HEADER_SEPARATOR = ':';
 
-	public static final String ENCRYPTION_ALGORITHM = "NONE";
+	public static final String NONE_ENCRYPTION_ALGORITHM = "NONE";
 	public static final String BINARY_HASH_FUNCTION = "MD5";
 	public static final Charset ENCODING = Charsets.UTF_8;
 	public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
@@ -47,74 +47,60 @@ public abstract class GntpMessage {
 	public static final String BINARY_SECTION_ID = "Identifier:";
 	public static final String BINARY_SECTION_LENGTH = "Length:";
 
-	private final GntpVersion version;
 	private final GntpMessageType type;
 	private final GntpPassword password;
+	private final boolean encrypt;
 	private final Map<String, String> headers;
 	private final List<BinarySection> binarySections;
 	private final DateFormat dateFormat;
 
+	private final StringBuilder buffer;
+	
 	public GntpMessage(GntpMessageType type, GntpPassword password) {
-		this(GntpVersion.ONE_DOT_ZERO, type, password);
-	}
-
-	public GntpMessage(GntpVersion version, GntpMessageType type, GntpPassword password) {
-		this.version = version;
 		this.type = type;
 		this.password = password;
+		this.encrypt = false; // Message encryption is not supported
 		headers = Maps.newHashMap();
 		binarySections = Lists.newArrayList();
-		dateFormat = new SimpleDateFormat();
+		dateFormat = new SimpleDateFormat(DATE_TIME_FORMAT);
+		buffer = new StringBuilder();
 	}
 
 	public abstract void append(OutputStream output) throws IOException;
 
-	public GntpId addBinary(InputSupplier<? extends InputStream> input) throws IOException {
-		BinarySection binarySection = new BinarySection(input);
-		binarySections.add(binarySection);
-
-		return GntpId.of(binarySection.getId());
+	public void appendStatusLine(GntpMessageWriter writer) throws IOException {
+		writer.writeStatusLine(type);
 	}
 
-	public void appendStatusLine(OutputStreamWriter writer) throws IOException {
-		writer.append(PROTOCOL_ID).append('/').append(version.toString());
-		writer.append(' ').append(type.toString());
-		writer.append(' ').append(ENCRYPTION_ALGORITHM);
-
-		if (password != null) {
-			writer.append(' ').append(password.getKeyHashAlgorithm());
-			writer.append(':').append(Hex.toHexadecimal(password.getKey()));
-			writer.append('.').append(Hex.toHexadecimal(password.getSalt()));
-		}
-	}
-
-	public void appendHeader(GntpMessageHeader header, Object value, OutputStreamWriter writer) throws IOException {
-		writer.append(header.toString()).append(HEADER_SEPARATOR).append(' ');
+	public void appendHeader(GntpMessageHeader header, Object value, GntpMessageWriter writer) throws IOException {
+		buffer.append(header.toString()).append(HEADER_SEPARATOR).append(' ');
 		if (value != null) {
 			if (value instanceof String) {
 				String s = (String) value;
 				s = s.replaceAll("\r\n", "\n");
-				writer.append(s);
+				buffer.append(s);
 			} else if (value instanceof Number) {
-				writer.append(((Number) value).toString());
+				buffer.append(((Number) value).toString());
 			} else if (value instanceof Boolean) {
 				String s = ((Boolean) value).toString();
 				s = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, s);
-				writer.append(s);
+				buffer.append(s);
 			} else if (value instanceof Date) {
 				String s = dateFormat.format((Date) value);
-				writer.append(s);
+				buffer.append(s);
 			} else if (value instanceof URI) {
-				writer.append(((URI) value).toString());
+				buffer.append(((URI) value).toString());
 			} else if (value instanceof GntpId) {
-				writer.append(value.toString());
+				buffer.append(value.toString());
 			} else {
 				throw new IllegalArgumentException("Value of header [" + header + "] not supported: " + value);
 			}
 		}
+		writer.writeHeaderLine(buffer.toString());
+		buffer.setLength(0);
 	}
 
-	public boolean appendIcon(GntpMessageHeader header, RenderedImage image, URI uri, OutputStreamWriter writer) throws IOException {
+	public boolean appendIcon(GntpMessageHeader header, RenderedImage image, URI uri, GntpMessageWriter writer) throws IOException {
 		if (image == null && uri == null) {
 			return false;
 		}
@@ -132,21 +118,26 @@ public abstract class GntpMessage {
 		return true;
 	}
 
-	public void appendBinarySections(OutputStream output) throws IOException {
-		OutputStreamWriter writer = new OutputStreamWriter(output, ENCODING);
+	public GntpId addBinary(InputSupplier<? extends InputStream> input) throws IOException {
+		BinarySection binarySection = new BinarySection(input);
+		binarySections.add(binarySection);
+
+		return GntpId.of(binarySection.getId());
+	}
+
+	public void appendBinarySections(GntpMessageWriter writer) throws IOException {
 		for (Iterator<BinarySection> iter = binarySections.iterator(); iter.hasNext(); ) {
 			BinarySection binarySection = iter.next();
-			binarySection.append(output, writer);
+			writer.writeBinarySection(binarySection);
 			if (iter.hasNext()) {
 				appendSeparator(writer);
 				appendSeparator(writer);
 			}
 		}
-		writer.flush();
 	}
 
-	public void appendSeparator(OutputStreamWriter writer) throws IOException {
-		writer.append(SEPARATOR);
+	public void appendSeparator(GntpMessageWriter writer) throws IOException {
+		writer.writeSeparator();
 	}
 
 	public void clearBinarySections() {
@@ -159,6 +150,17 @@ public abstract class GntpMessage {
 
 	public Map<String, String> getHeaders() {
 		return ImmutableMap.copyOf(headers);
+	}
+	
+	protected GntpMessageWriter getWriter(OutputStream output) {
+		GntpMessageWriter messageWriter;
+		if (encrypt) {
+			messageWriter = new EncryptedGntpMessageWriter();
+		} else {
+			messageWriter = new ClearTextGntpMessageWriter();
+		}
+		messageWriter.prepare(output, password);
+		return messageWriter;
 	}
 
 	public static class BinarySection {
@@ -176,16 +178,6 @@ public abstract class GntpMessage {
 			} catch (NoSuchAlgorithmException e) {
 				throw new RuntimeException(e);
 			}
-		}
-
-		public void append(OutputStream output, OutputStreamWriter writer) throws IOException {
-			writer.append(BINARY_SECTION_ID).append(' ').append(id);
-			writer.append(SEPARATOR);
-			writer.append(BINARY_SECTION_LENGTH).append(' ').append(Long.toString(data.length));
-			writer.append(SEPARATOR).append(SEPARATOR);
-			writer.flush();
-
-			output.write(data);
 		}
 
 		public String getId() {
