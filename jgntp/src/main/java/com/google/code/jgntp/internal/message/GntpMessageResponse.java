@@ -20,14 +20,20 @@ import java.io.*;
 public abstract class GntpMessageResponse extends GntpMessage {
 
 	private final GntpMessageType respondingType;
+	private final long internalNotificationId;
 
-	public GntpMessageResponse(GntpMessageType type, GntpMessageType respondingType) {
+	public GntpMessageResponse(GntpMessageType type, GntpMessageType respondingType, long internalNotificationId) {
 		super(type, null, false);
 		this.respondingType = respondingType;
+		this.internalNotificationId = internalNotificationId;
 	}
 
 	public GntpMessageType getRespondingType() {
 		return respondingType;
+	}
+
+	public long getInternalNotificationId() {
+		return internalNotificationId;
 	}
 
 	@Override

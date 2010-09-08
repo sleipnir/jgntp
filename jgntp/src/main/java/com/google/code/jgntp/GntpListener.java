@@ -19,15 +19,17 @@ public interface GntpListener {
 
 	void onRegistrationSuccess();
 
-	void onClickCallback(Object context);
+	void onNotificationSuccess(GntpNotification notification);
 
-	void onCloseCallback(Object context);
+	void onClickCallback(GntpNotification notification);
 
-	void onTimeoutCallback(Object context);
+	void onCloseCallback(GntpNotification notification);
+
+	void onTimeoutCallback(GntpNotification notification);
 
 	void onRegistrationError(GntpErrorStatus status, String description);
 
-	void onNotificationError(GntpErrorStatus status, String description);
+	void onNotificationError(GntpNotification notification, GntpErrorStatus status, String description);
 
 	void onCommunicationError(Throwable t);
 
