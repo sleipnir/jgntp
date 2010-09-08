@@ -19,6 +19,7 @@ import java.awt.image.*;
 import java.net.*;
 
 import com.google.code.jgntp.*;
+import com.google.common.base.*;
 
 public class GntpNotificationInfoDefaultImpl implements GntpNotificationInfo {
 
@@ -30,6 +31,8 @@ public class GntpNotificationInfoDefaultImpl implements GntpNotificationInfo {
 	private final URI iconUri;
 
 	public GntpNotificationInfoDefaultImpl(GntpApplicationInfo applicationInfo, String name, String displayName, boolean enabled, RenderedImage iconImage, URI iconUri) {
+		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
+		Preconditions.checkNotNull(name, "Notification name must not be null");
 		this.applicationInfo = applicationInfo;
 		this.name = name;
 		this.displayName = displayName;
@@ -72,7 +75,8 @@ public class GntpNotificationInfoDefaultImpl implements GntpNotificationInfo {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (name == null ? 0 : name.hashCode());
+		result = prime * result + ((applicationInfo == null) ? 0 : applicationInfo.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
 
@@ -88,6 +92,13 @@ public class GntpNotificationInfoDefaultImpl implements GntpNotificationInfo {
 			return false;
 		}
 		GntpNotificationInfoDefaultImpl other = (GntpNotificationInfoDefaultImpl) obj;
+		if (applicationInfo == null) {
+			if (other.applicationInfo != null) {
+				return false;
+			}
+		} else if (!applicationInfo.equals(other.applicationInfo)) {
+			return false;
+		}
 		if (name == null) {
 			if (other.name != null) {
 				return false;

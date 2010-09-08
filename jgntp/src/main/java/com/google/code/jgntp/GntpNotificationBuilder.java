@@ -40,7 +40,6 @@ public class GntpNotificationBuilder {
 
 	public GntpNotificationBuilder(GntpNotificationInfo info, String title) {
 		Preconditions.checkNotNull(info, "Notification info must not be null");
-		Preconditions.checkNotNull(title, "Notification title must not be null");
 		applicationName = info.getApplicationInfo().getName();
 		name = info.getName();
 		this.title = title;

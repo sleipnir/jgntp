@@ -19,7 +19,6 @@ import java.awt.image.*;
 import java.net.*;
 
 import com.google.code.jgntp.internal.*;
-import com.google.common.base.*;
 
 public class GntpApplicationInfoBuilder {
 
@@ -28,12 +27,10 @@ public class GntpApplicationInfoBuilder {
 	private URI iconUri;
 
 	public GntpApplicationInfoBuilder(String name) {
-		Preconditions.checkNotNull(name, "Application name must not be null");
 		this.name = name;
 	}
 
 	public GntpApplicationInfoBuilder name(String name) {
-		Preconditions.checkNotNull(name, "Application name must not be null");
 		this.name = name;
 		return this;
 	}

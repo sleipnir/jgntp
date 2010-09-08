@@ -20,6 +20,7 @@ import java.net.*;
 import java.util.*;
 
 import com.google.code.jgntp.*;
+import com.google.common.base.*;
 import com.google.common.collect.*;
 
 public class GntpApplicationInfoDefaultImpl implements GntpApplicationInfo {
@@ -30,6 +31,7 @@ public class GntpApplicationInfoDefaultImpl implements GntpApplicationInfo {
 	private final List<GntpNotificationInfo> notificationInfos;
 
 	public GntpApplicationInfoDefaultImpl(String name, RenderedImage iconImage, URI iconUri) {
+		Preconditions.checkNotNull(name, "Application name must not be null");
 		this.name = name;
 		this.iconImage = iconImage;
 		this.iconUri = iconUri;

@@ -32,6 +32,7 @@ public class GntpPasswordDefaultImpl implements GntpPassword {
 	private final byte[] salt;
 
 	public GntpPasswordDefaultImpl(String textPassword) {
+		Preconditions.checkNotNull(textPassword, "Text password must not be null");
 		byte[] passwordBytes = textPassword.getBytes(Charsets.UTF_8);
 		salt = getSalt(DEFAULT_RANDOM_SALT_ALGORITHM);
 		byte[] keyBasis = getKeyBasis(passwordBytes, salt);

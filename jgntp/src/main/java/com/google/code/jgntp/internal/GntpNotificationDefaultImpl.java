@@ -19,6 +19,7 @@ import java.awt.image.*;
 import java.net.*;
 
 import com.google.code.jgntp.*;
+import com.google.common.base.*;
 
 public class GntpNotificationDefaultImpl implements GntpNotification {
 
@@ -38,6 +39,9 @@ public class GntpNotificationDefaultImpl implements GntpNotification {
 
 	public GntpNotificationDefaultImpl(String applicationName, String name, String id, String title, String text, Boolean sticky, Priority priority, RenderedImage iconImage, URI iconUri,
 			String coalescingId, URI callbackTarget, boolean callbackRequested, Object context) {
+		Preconditions.checkNotNull(applicationName, "Application name must not be null");
+		Preconditions.checkNotNull(name, "Notification name must not be null");
+		Preconditions.checkNotNull(title, "Notification title must not be null");
 		this.applicationName = applicationName;
 		this.name = name;
 		this.id = id;

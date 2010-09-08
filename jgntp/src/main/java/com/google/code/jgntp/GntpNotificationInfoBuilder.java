@@ -19,7 +19,6 @@ import java.awt.image.*;
 import java.net.*;
 
 import com.google.code.jgntp.internal.*;
-import com.google.common.base.*;
 
 public class GntpNotificationInfoBuilder {
 
@@ -31,11 +30,9 @@ public class GntpNotificationInfoBuilder {
 	private URI iconUri;
 
 	public GntpNotificationInfoBuilder(GntpApplicationInfo applicationInfo, String name) {
-		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
-		Preconditions.checkNotNull(name, "Notification name must not be null");
 		this.applicationInfo = applicationInfo;
 		this.name = name;
-		enabled = true;
+		this.enabled = true;
 	}
 
 	public GntpNotificationInfoBuilder applicationInfo(GntpApplicationInfo applicationInfo) {
@@ -44,7 +41,6 @@ public class GntpNotificationInfoBuilder {
 	}
 
 	public GntpNotificationInfoBuilder name(String name) {
-		Preconditions.checkNotNull(name, "Notification name must not be null");
 		this.name = name;
 		return this;
 	}
