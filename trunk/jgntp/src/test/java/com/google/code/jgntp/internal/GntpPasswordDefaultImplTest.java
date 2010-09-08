@@ -39,7 +39,7 @@ public class GntpPasswordDefaultImplTest {
 			}
 		};
 		byte[] expectedKey = Hex.fromHexadecimal("FC164AC0B12DFAF6D796C61BE16542A1108FA442997FDC447D569C03820605113D23C4AE42387FE6060EE1ED4F6872BC30F67A63C2CE4F02695B061631230815");
-		assertArrayEquals(password.getKey(), expectedKey);
+		assertArrayEquals(password.getKeyHash(), expectedKey);
 
 		byte[] data = "test".getBytes(Charsets.UTF_8);
 

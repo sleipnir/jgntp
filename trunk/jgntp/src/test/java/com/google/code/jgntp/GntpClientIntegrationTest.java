@@ -24,9 +24,9 @@ import org.slf4j.*;
 
 import static java.util.concurrent.TimeUnit.*;
 
-public class GntpClientTest {
+public class GntpClientIntegrationTest {
 
-	private static Logger logger = LoggerFactory.getLogger(GntpClientTest.class);
+	private static Logger logger = LoggerFactory.getLogger(GntpClientIntegrationTest.class);
 
 	@Test
 	public void test() throws Exception {
