@@ -86,6 +86,7 @@ public class GntpClientIntegrationTest {
 
 		client.notify(Gntp.notification(notif2, "Title 2")
 						.text("Message 2")
+						.icon(ImageIO.read(getClass().getResourceAsStream("icon.png")))
 						.callbackTarget(URI.create("http://slashdot.org/"))
 						.header(Gntp.CUSTOM_HEADER_PREFIX + "Payload", getClass().getResourceAsStream("sms.png"))
 						.build(), 5, SECONDS);
