@@ -77,8 +77,19 @@ public class GntpClientIntegrationTest {
 		}).build();
 
 		client.register();
-		client.notify(Gntp.notification(notif1, "Title").text("Message").withCallback().context(12345).build(), 5, SECONDS);
-		client.notify(Gntp.notification(notif2, "Title 2").text("Message 2").callbackTarget(URI.create("http://slashdot.org/")).build(), 5, SECONDS);
+		client.notify(Gntp.notification(notif1, "Title")
+						.text("Message")
+						.withCallback()
+						.context(12345)
+						.header(Gntp.APP_SPECIFIC_HEADER_PREFIX + "Filename", "file.txt")
+						.build(), 5, SECONDS);
+
+		client.notify(Gntp.notification(notif2, "Title 2")
+						.text("Message 2")
+						.callbackTarget(URI.create("http://slashdot.org/"))
+						.header(Gntp.CUSTOM_HEADER_PREFIX + "Payload", getClass().getResourceAsStream("sms.png"))
+						.build(), 5, SECONDS);
+
 		SECONDS.sleep(5);
 		client.shutdown(50, SECONDS);
 	}

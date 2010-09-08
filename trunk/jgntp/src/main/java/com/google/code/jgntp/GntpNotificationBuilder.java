@@ -17,10 +17,12 @@ package com.google.code.jgntp;
 
 import java.awt.image.*;
 import java.net.*;
+import java.util.*;
 
 import com.google.code.jgntp.GntpNotification.*;
 import com.google.code.jgntp.internal.*;
 import com.google.common.base.*;
+import com.google.common.collect.*;
 
 public class GntpNotificationBuilder {
 
@@ -37,12 +39,14 @@ public class GntpNotificationBuilder {
 	private URI callbackTarget;
 	private boolean callbackRequested;
 	private Object context;
+	private Map<String, Object> customHeaders;
 
 	public GntpNotificationBuilder(GntpNotificationInfo info, String title) {
 		Preconditions.checkNotNull(info, "Notification info must not be null");
 		applicationName = info.getApplicationInfo().getName();
 		name = info.getName();
 		this.title = title;
+		this.customHeaders = Maps.newHashMap();
 	}
 
 	public GntpNotificationBuilder info(GntpNotificationInfo info) {
@@ -117,7 +121,12 @@ public class GntpNotificationBuilder {
 		return this;
 	}
 
+	public GntpNotificationBuilder header(String name, Object value) {
+		customHeaders.put(name, value);
+		return this;
+	}
+
 	public GntpNotification build() {
-		return new GntpNotificationDefaultImpl(applicationName, name, id, title, text, sticky, priority, iconImage, iconUri, coalescingId, callbackTarget, callbackRequested, context);
+		return new GntpNotificationDefaultImpl(applicationName, name, id, title, text, sticky, priority, iconImage, iconUri, coalescingId, callbackTarget, callbackRequested, context, customHeaders);
 	}
 }

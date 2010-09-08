@@ -16,6 +16,7 @@
 package com.google.code.jgntp.internal.message;
 
 import java.io.*;
+import java.util.*;
 
 import com.google.code.jgntp.*;
 import com.google.code.jgntp.internal.message.write.*;
@@ -92,7 +93,16 @@ public class GntpNotifyMessage extends GntpMessage {
 
 		appendHeader(GntpMessageHeader.NOTIFICATION_INTERNAL_ID, notificationId, writer);
 		appendSeparator(writer);
+
+		for (Map.Entry<String, Object> customHeader : notification.getCustomHeaders().entrySet()) {
+			appendHeader(customHeader.getKey(), customHeader.getValue(), writer);
+			appendSeparator(writer);
+		}
 		
+		if (!getBinarySections().isEmpty()) {
+			appendSeparator(writer);
+		}
+
 		writer.finishHeaders();
 
 		appendBinarySections(writer);

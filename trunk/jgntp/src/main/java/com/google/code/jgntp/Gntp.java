@@ -24,6 +24,9 @@ import com.google.common.base.*;
 
 public class Gntp {
 
+	public static final String CUSTOM_HEADER_PREFIX = "X-";
+	public static final String APP_SPECIFIC_HEADER_PREFIX = "Data-";
+
 	public static final String DEFAULT_HOST = "localhost";
 	public static final int WINDOWS_PORT = 23053;
 	public static final int MAC_PORT = 23052;

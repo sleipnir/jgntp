@@ -36,6 +36,7 @@ public abstract class GntpMessage {
 
 	public static final String PROTOCOL_ID = "GNTP";
 	public static final String SEPARATOR = "\r\n";
+	
 	public static final char HEADER_SEPARATOR = ':';
 
 	public static final String NONE_ENCRYPTION_ALGORITHM = "NONE";
@@ -74,7 +75,11 @@ public abstract class GntpMessage {
 	}
 
 	public void appendHeader(GntpMessageHeader header, Object value, GntpMessageWriter writer) throws IOException {
-		buffer.append(header.toString()).append(HEADER_SEPARATOR).append(' ');
+		appendHeader(header.toString(), value, writer);
+	}
+
+	public void appendHeader(String name, Object value, GntpMessageWriter writer) throws IOException {
+		buffer.append(name).append(HEADER_SEPARATOR).append(' ');
 		if (value != null) {
 			if (value instanceof String) {
 				String s = (String) value;
@@ -93,8 +98,16 @@ public abstract class GntpMessage {
 				buffer.append(((URI) value).toString());
 			} else if (value instanceof GntpId) {
 				buffer.append(value.toString());
+			} else if (value instanceof InputStream) {
+				byte[] data = ByteStreams.toByteArray((InputStream)value);
+				GntpId id = addBinary(data);
+				buffer.append(id.toString());
+			} else if (value instanceof byte[]) {
+				byte[] data = (byte[])value;
+				GntpId id = addBinary(data);
+				buffer.append(id.toString());
 			} else {
-				throw new IllegalArgumentException("Value of header [" + header + "] not supported: " + value);
+				throw new IllegalArgumentException("Value of header [" + name + "] not supported: " + value);
 			}
 		}
 		writer.writeHeaderLine(buffer.toString());
@@ -113,14 +126,14 @@ public abstract class GntpMessage {
 			if (!ImageIO.write(image, IMAGE_FORMAT, output)) {
 				throw new IllegalStateException("Could not read icon data");
 			}
-			GntpId id = addBinary(ByteStreams.newInputStreamSupplier(output.toByteArray()));
+			GntpId id = addBinary(output.toByteArray());
 			appendHeader(header, id, writer);
 		}
 		return true;
 	}
 
-	public GntpId addBinary(InputSupplier<? extends InputStream> input) throws IOException {
-		BinarySection binarySection = new BinarySection(input);
+	public GntpId addBinary(byte[] data) throws IOException {
+		BinarySection binarySection = new BinarySection(data);
 		binarySections.add(binarySection);
 
 		return GntpId.of(binarySection.getId());
@@ -152,7 +165,11 @@ public abstract class GntpMessage {
 	public Map<String, String> getHeaders() {
 		return ImmutableMap.copyOf(headers);
 	}
-	
+
+	public List<BinarySection> getBinarySections() {
+		return ImmutableList.copyOf(binarySections);
+	}
+
 	protected GntpMessageWriter getWriter(OutputStream output) {
 		GntpMessageWriter messageWriter;
 		if (encrypt) {
@@ -168,8 +185,8 @@ public abstract class GntpMessage {
 		private final String id;
 		private final byte[] data;
 
-		public BinarySection(InputSupplier<? extends InputStream> input) throws IOException {
-			data = ByteStreams.toByteArray(input.getInput());
+		public BinarySection(byte[] data) throws IOException {
+			this.data = data;
 			MessageDigest digest;
 			try {
 				digest = MessageDigest.getInstance(BINARY_HASH_FUNCTION);
