@@ -17,9 +17,11 @@ package com.google.code.jgntp.internal;
 
 import java.awt.image.*;
 import java.net.*;
+import java.util.*;
 
 import com.google.code.jgntp.*;
 import com.google.common.base.*;
+import com.google.common.collect.*;
 
 public class GntpNotificationDefaultImpl implements GntpNotification {
 
@@ -36,9 +38,10 @@ public class GntpNotificationDefaultImpl implements GntpNotification {
 	private final URI callbackTarget;
 	private final boolean callbackRequested;
 	private final Object context;
+	private final Map<String, Object> customHeaders;
 
 	public GntpNotificationDefaultImpl(String applicationName, String name, String id, String title, String text, Boolean sticky, Priority priority, RenderedImage iconImage, URI iconUri,
-			String coalescingId, URI callbackTarget, boolean callbackRequested, Object context) {
+			String coalescingId, URI callbackTarget, boolean callbackRequested, Object context, Map<String, Object> customHeaders) {
 		Preconditions.checkNotNull(applicationName, "Application name must not be null");
 		Preconditions.checkNotNull(name, "Notification name must not be null");
 		Preconditions.checkNotNull(title, "Notification title must not be null");
@@ -55,6 +58,7 @@ public class GntpNotificationDefaultImpl implements GntpNotification {
 		this.callbackTarget = callbackTarget;
 		this.callbackRequested = callbackRequested;
 		this.context = context;
+		this.customHeaders = ImmutableMap.copyOf(customHeaders);
 	}
 
 	@Override
@@ -120,6 +124,11 @@ public class GntpNotificationDefaultImpl implements GntpNotification {
 	@Override
 	public boolean isCallbackRequested() {
 		return callbackRequested;
+	}
+
+	@Override
+	public Map<String, Object> getCustomHeaders() {
+		return customHeaders;
 	}
 
 	@Override

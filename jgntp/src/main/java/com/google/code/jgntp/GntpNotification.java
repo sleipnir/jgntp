@@ -17,6 +17,7 @@ package com.google.code.jgntp;
 
 import java.awt.image.*;
 import java.net.*;
+import java.util.*;
 
 public interface GntpNotification {
 
@@ -45,6 +46,8 @@ public interface GntpNotification {
 	boolean isCallbackRequested();
 
 	Object getContext();
+
+	Map<String, Object> getCustomHeaders();
 
 	enum Priority {
 		LOWEST(-2), LOW(-1), NORMAL(0), HIGH(1), HIGHEST(2);

@@ -23,6 +23,7 @@ import org.jboss.netty.channel.ChannelHandler.*;
 import org.slf4j.*;
 
 import com.google.code.jgntp.internal.message.*;
+import com.google.code.jgntp.internal.util.*;
 
 @Sharable
 public class GntpMessageEncoder extends SimpleChannelHandler {
@@ -30,16 +31,24 @@ public class GntpMessageEncoder extends SimpleChannelHandler {
 	private static final Logger logger = LoggerFactory.getLogger(GntpMessageEncoder.class);
 
 	@Override
+	@SuppressWarnings("null")
 	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		GntpMessage message = (GntpMessage) e.getMessage();
 
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		message.append(new ChannelBufferOutputStream(buffer));
+		OutputStream outputStream;
+		ByteArrayOutputStream debugOutputStream;
+		if (logger.isDebugEnabled()) {
+			debugOutputStream = new ByteArrayOutputStream();
+			outputStream = new MultiOutputStream(new ChannelBufferOutputStream(buffer), debugOutputStream);
+		} else {
+			debugOutputStream = null;
+			outputStream = new ChannelBufferOutputStream(buffer);
+		}
+		message.append(outputStream);
 
 		if (logger.isDebugEnabled()) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			message.append(baos);
-			logger.debug("Sending message\n{}", new String(baos.toByteArray(), GntpMessage.ENCODING));
+			logger.debug("Sending message\n{}", new String(debugOutputStream.toByteArray(), GntpMessage.ENCODING));
 		}
 
 		Channels.write(ctx, e.getFuture(), buffer);
