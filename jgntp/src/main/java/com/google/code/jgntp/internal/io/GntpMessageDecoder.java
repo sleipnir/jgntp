@@ -15,6 +15,9 @@
  */
 package com.google.code.jgntp.internal.io;
 
+import java.io.*;
+import java.util.concurrent.atomic.*;
+
 import org.jboss.netty.buffer.*;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.channel.ChannelHandler.*;
@@ -23,25 +26,52 @@ import org.slf4j.*;
 
 import com.google.code.jgntp.internal.message.*;
 import com.google.code.jgntp.internal.message.read.*;
+import com.google.common.io.*;
 
 @Sharable
 public class GntpMessageDecoder extends OneToOneDecoder {
 
 	private static final Logger logger = LoggerFactory.getLogger(GntpMessageDecoder.class);
 
+	private static final String DUMP_MESSAGES_DIRECTORY_PROPERTY = "gntp.response.dump.dir";
+
 	private final GntpMessageResponseParser parser;
+	private File dumpDir;
+	private AtomicLong dumpCounter;
 
 	public GntpMessageDecoder() {
 		parser = new GntpMessageResponseParser();
+		String dumpDirName = System.getProperty(DUMP_MESSAGES_DIRECTORY_PROPERTY);
+		dumpDir = dumpDirName == null ? null : new File(dumpDirName);
+		if (dumpDir != null) {
+			dumpCounter = new AtomicLong();
+			try {
+				Files.createParentDirs(dumpDir);
+			} catch (IOException e) {
+				logger.warn("Could not get/create GNTP response dump directory, dumping will be disabled", e);
+				dumpDir = null;
+			}
+		}
 	}
 
 	@Override
 	protected Object decode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
 		ChannelBuffer buffer = (ChannelBuffer) msg;
-		String s = new String(buffer.array(), GntpMessage.ENCODING);
+		byte[] b = new byte[buffer.readableBytes()];
+		buffer.getBytes(0, b);
+		String s = new String(b, GntpMessage.ENCODING);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Message received\n{}", s);
+
+			if (dumpDir != null) {
+				try {
+					String fileName = "gntp-response-" + dumpCounter.getAndIncrement() + ".out";
+					Files.write(b, new File(dumpDir, fileName));
+				} catch (IOException e) {
+					logger.warn("Could not save GNTP request dump", e);
+				}
+			}
 		}
 
 		return parser.parse(s);
