@@ -107,6 +107,9 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 			} else {
 				listener.onCommunicationError(e.getCause());
 			}
+			if (!gntpClient.isRegistered() && gntpClient.canRetry()) {
+				gntpClient.register();
+			}
 		} finally {
 			e.getChannel().close();
 		}

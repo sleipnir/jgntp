@@ -105,7 +105,7 @@ public class NioGntpClient implements GntpClient {
 					GntpMessage message = new GntpRegisterMessage(applicationInfo, password, encrypted);
 					future.getChannel().write(message);
 				} else {
-					if (retryExecutorService != null) {
+					if (canRetry()) {
 						logger.debug("Registration failed, retrying in [{}] [{}]", retryTime, retryTimeUnit);
 						retryExecutorService.schedule(new Runnable() {
 							@Override
@@ -178,6 +178,10 @@ public class NioGntpClient implements GntpClient {
 		return notificationsSent;
 	}
 
+	boolean canRetry() {
+		return retryExecutorService != null;
+	}
+
 	protected void notifyInternal(final GntpNotification notification) {
 		if (!closed) {
 			logger.debug("Sending notification [{}]", notification);
@@ -193,7 +197,7 @@ public class NioGntpClient implements GntpClient {
 						GntpMessage message = new GntpNotifyMessage(notification, notificationId, password, encrypted);
 						future.getChannel().write(message);
 					} else {
-						if (retryExecutorService != null) {
+						if (canRetry()) {
 							Integer count = notificationRetries.get(notification);
 							if (count == null) {
 								count = 1;
