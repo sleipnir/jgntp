@@ -76,9 +76,12 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 						throw new IllegalStateException("Unknown callback result: " + callbackMessage.getCallbackResult());
 				}
 			} else if (message instanceof GntpErrorMessage) {
+				GntpErrorMessage errorMessage = (GntpErrorMessage) message;
 				if (listener != null) {
-					GntpErrorMessage errorMessage = (GntpErrorMessage) message;
 					listener.onNotificationError(notification, errorMessage.getStatus(), errorMessage.getDescription());
+				}
+				if (GntpErrorStatus.UNKNOWN_APPLICATION == errorMessage.getStatus() && gntpClient.canRetry()) {
+					gntpClient.register();
 				}
 			}
 		} else {
