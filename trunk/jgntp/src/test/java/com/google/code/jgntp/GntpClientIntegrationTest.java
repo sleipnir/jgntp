@@ -34,7 +34,7 @@ public class GntpClientIntegrationTest {
 		GntpNotificationInfo notif1 = Gntp.notificationInfo(info, "Notify 1").icon(ImageIO.read(getClass().getResourceAsStream("icon.png"))).build();
 		GntpNotificationInfo notif2 = Gntp.notificationInfo(info, "Notify 2").icon(ImageIO.read(getClass().getResourceAsStream("sms.png"))).build();
 
-		GntpClient client = Gntp.client(info).withPassword("test").listener(new GntpListener() {
+		GntpClient client = Gntp.client(info).listener(new GntpListener() {
 			@Override
 			public void onRegistrationSuccess() {
 				logger.info("Registered");
@@ -92,6 +92,6 @@ public class GntpClientIntegrationTest {
 						.build(), 5, SECONDS);
 
 		SECONDS.sleep(5);
-		client.shutdown(50, SECONDS);
+		client.shutdown(5, SECONDS);
 	}
 }
