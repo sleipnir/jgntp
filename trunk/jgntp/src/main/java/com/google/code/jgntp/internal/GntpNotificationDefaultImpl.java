@@ -133,7 +133,50 @@ public class GntpNotificationDefaultImpl implements GntpNotification {
 
 	@Override
 	public String toString() {
-		return String.format("application=%s, name=%s, title=%s, text=%s", applicationName, name, title, text);
+		StringBuilder sb = new StringBuilder();
+		sb.append("application=").append(applicationName);
+		sb.append(", name=").append(name);
+		sb.append(", title=").append(title);
+		sb.append(", text=").append(text);
+		sb.append(", callbackRequested=").append(callbackRequested);
+		
+		if (id != null) {
+			sb.append(", id=").append(id);
+		}
+		
+		if (sticky != null) {
+			sb.append(", sticky=").append(sticky);
+		}
+		
+		if (priority != null) {
+			sb.append(", priority=").append(priority);
+		}
+		
+		if (iconImage != null) {
+			sb.append(", iconImage=true");
+		}
+		
+		if (iconUri != null) {
+			sb.append(", iconUri=").append(iconUri);
+		}
+		
+		if (coalescingId != null) {
+			sb.append(", coalescingId=").append(coalescingId);
+		}
+		
+		if (callbackTarget != null) {
+			sb.append(", callbackTarget=").append(callbackTarget);
+		}
+		
+		if (context != null) {
+			sb.append(", context=").append(context);
+		}
+		
+		if (!customHeaders.isEmpty()) {
+			sb.append(", customHeaders=").append(customHeaders);
+		}
+
+		return sb.toString();
 	}
 
 }
