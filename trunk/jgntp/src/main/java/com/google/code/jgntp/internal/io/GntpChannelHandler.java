@@ -80,7 +80,9 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 				if (listener != null) {
 					listener.onNotificationError(notification, errorMessage.getStatus(), errorMessage.getDescription());
 				}
-				if (GntpErrorStatus.UNKNOWN_APPLICATION == errorMessage.getStatus() && gntpClient.canRetry()) {
+				if ((GntpErrorStatus.UNKNOWN_APPLICATION == errorMessage.getStatus() ||
+					GntpErrorStatus.UNKNOWN_NOTIFICATION == errorMessage.getStatus()) &&
+					gntpClient.canRetry()) {
 					gntpClient.register();
 				}
 			}
