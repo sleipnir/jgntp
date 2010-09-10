@@ -181,6 +181,18 @@ public class NioGntpClient implements GntpClient {
 	boolean canRetry() {
 		return retryExecutorService != null;
 	}
+	
+	void retryRegistration() {
+		if (canRetry()) {
+			logger.info("Scheduling registration retry in [{}-{}]", retryTime, retryTimeUnit);
+			retryExecutorService.schedule(new Runnable() {
+				@Override
+				public void run() {
+					register();
+				}
+			}, retryTime, retryTimeUnit);
+		}
+	}
 
 	protected void notifyInternal(final GntpNotification notification) {
 		if (!closed) {
@@ -203,7 +215,7 @@ public class NioGntpClient implements GntpClient {
 								count = 1;
 							}
 							if (count <= notificationRetryCount) {
-								logger.debug("Failed to send notification [{}], retrying [{}/{}]", new Object[] { notification, count, notificationRetryCount });
+								logger.debug("Failed to send notification [{}], retry [{}/{}] in [{}-{}]", new Object[] { notification, count, notificationRetryCount, retryTime, retryTimeUnit });
 								notificationRetries.put(notification, ++count);
 								retryExecutorService.schedule(new Runnable() {
 									public void run() {

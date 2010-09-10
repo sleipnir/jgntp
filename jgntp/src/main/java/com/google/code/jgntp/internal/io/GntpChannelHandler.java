@@ -15,6 +15,8 @@
  */
 package com.google.code.jgntp.internal.io;
 
+import java.io.*;
+
 import org.jboss.netty.channel.*;
 import org.slf4j.*;
 
@@ -112,8 +114,8 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 			} else {
 				listener.onCommunicationError(e.getCause());
 			}
-			if (!gntpClient.isRegistered() && gntpClient.canRetry()) {
-				gntpClient.register();
+			if (e.getCause() instanceof IOException && !gntpClient.isRegistered()) {
+				gntpClient.retryRegistration();
 			}
 		} finally {
 			e.getChannel().close();
