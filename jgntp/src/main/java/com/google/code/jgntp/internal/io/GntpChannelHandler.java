@@ -98,10 +98,13 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 					gntpClient.setRegistered();
 				}
 			} else if (message instanceof GntpErrorMessage) {
+				GntpErrorMessage errorMessage = (GntpErrorMessage) message;
 				if (listener != null) {
-					GntpErrorMessage errorMessage = (GntpErrorMessage) message;
 					listener.onRegistrationError(errorMessage.getStatus(), errorMessage.getDescription());
-				}	
+				}
+				if (GntpErrorStatus.NOT_AUTHORIZED == errorMessage.getStatus()) {
+					gntpClient.retryRegistration();
+				}
 			}
 		}
 	}
