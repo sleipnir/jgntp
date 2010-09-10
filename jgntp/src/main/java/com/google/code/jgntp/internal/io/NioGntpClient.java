@@ -84,6 +84,8 @@ public class NioGntpClient implements GntpClient {
 		bootstrap.setPipelineFactory(new GntpChannelPipelineFactory(new GntpChannelHandler(this, listener)));
 		bootstrap.setOption("tcpNoDelay", true);
 		bootstrap.setOption("remoteAddress", growlAddress);
+		bootstrap.setOption("soTimeout", 60 * 1000);
+		bootstrap.setOption("receiveBufferSizePredictor", new AdaptiveReceiveBufferSizePredictor());
 		channelGroup = new DefaultChannelGroup("jgntp");
 
 		notificationIdGenerator = new AtomicLong();

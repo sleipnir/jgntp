@@ -48,44 +48,46 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 
 		if (gntpClient.isRegistered()) {
 			GntpNotification notification = (GntpNotification)gntpClient.getNotificationsSent().get(message.getInternalNotificationId());
-			if (message instanceof GntpOkMessage) {
-				try {
+			if (notification != null) {
+				if (message instanceof GntpOkMessage) {
+					try {
+						if (listener != null) {
+							listener.onNotificationSuccess(notification);
+						}
+					} finally {
+						if (!notification.isCallbackRequested()) {
+							gntpClient.getNotificationsSent().remove(message.getInternalNotificationId());
+						}
+					}
+				} else if (message instanceof GntpCallbackMessage) {
+					gntpClient.getNotificationsSent().remove(message.getInternalNotificationId());
+					if (listener == null) {
+						throw new IllegalStateException("A GntpListener must be set in GntpClient to be able to receive callbacks");
+					}
+					GntpCallbackMessage callbackMessage = (GntpCallbackMessage) message;
+					switch (callbackMessage.getCallbackResult()) {
+						case CLICK:
+							listener.onClickCallback(notification);
+							break;
+						case CLOSE:
+							listener.onCloseCallback(notification);
+							break;
+						case TIMEOUT:
+							listener.onTimeoutCallback(notification);
+							break;
+						default:
+							throw new IllegalStateException("Unknown callback result: " + callbackMessage.getCallbackResult());
+					}
+				} else if (message instanceof GntpErrorMessage) {
+					GntpErrorMessage errorMessage = (GntpErrorMessage) message;
 					if (listener != null) {
-						listener.onNotificationSuccess(notification);
+						listener.onNotificationError(notification, errorMessage.getStatus(), errorMessage.getDescription());
 					}
-				} finally {
-					if (!notification.isCallbackRequested()) {
-						gntpClient.getNotificationsSent().remove(message.getInternalNotificationId());
+					if ((GntpErrorStatus.UNKNOWN_APPLICATION == errorMessage.getStatus() ||
+						GntpErrorStatus.UNKNOWN_NOTIFICATION == errorMessage.getStatus()) &&
+						gntpClient.canRetry()) {
+						gntpClient.register();
 					}
-				}
-			} else if (message instanceof GntpCallbackMessage) {
-				gntpClient.getNotificationsSent().remove(message.getInternalNotificationId());
-				if (listener == null) {
-					throw new IllegalStateException("A GntpListener must be set in GntpClient to be able to receive callbacks");
-				}
-				GntpCallbackMessage callbackMessage = (GntpCallbackMessage) message;
-				switch (callbackMessage.getCallbackResult()) {
-					case CLICK:
-						listener.onClickCallback(notification);
-						break;
-					case CLOSE:
-						listener.onCloseCallback(notification);
-						break;
-					case TIMEOUT:
-						listener.onTimeoutCallback(notification);
-						break;
-					default:
-						throw new IllegalStateException("Unknown callback result: " + callbackMessage.getCallbackResult());
-				}
-			} else if (message instanceof GntpErrorMessage) {
-				GntpErrorMessage errorMessage = (GntpErrorMessage) message;
-				if (listener != null) {
-					listener.onNotificationError(notification, errorMessage.getStatus(), errorMessage.getDescription());
-				}
-				if ((GntpErrorStatus.UNKNOWN_APPLICATION == errorMessage.getStatus() ||
-					GntpErrorStatus.UNKNOWN_NOTIFICATION == errorMessage.getStatus()) &&
-					gntpClient.canRetry()) {
-					gntpClient.register();
 				}
 			}
 		} else {
@@ -107,6 +109,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 				}
 			}
 		}
+		e.getChannel().close();
 	}
 
 	@Override
