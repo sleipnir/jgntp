@@ -50,7 +50,6 @@ public class NioGntpClient implements GntpClient {
 	private final AtomicLong notificationIdGenerator;
 	private final BiMap<Long, Object> notificationsSent;
 
-	private volatile boolean retryingRegistration;
 	private final Map<GntpNotification, Integer> notificationRetries;
 	private volatile boolean closed;
 
@@ -107,16 +106,6 @@ public class NioGntpClient implements GntpClient {
 					channelGroup.add(future.getChannel());
 					GntpMessage message = new GntpRegisterMessage(applicationInfo, password, encrypted);
 					future.getChannel().write(message);
-				} else {
-					if (canRetry()) {
-						logger.debug("Registration failed, retrying in [{}] [{}]", retryTime, retryTimeUnit);
-						retryExecutorService.schedule(new Runnable() {
-							@Override
-							public void run() {
-								register();
-							}
-						}, retryTime, retryTimeUnit);
-					}
 				}
 			}
 		});
@@ -182,17 +171,15 @@ public class NioGntpClient implements GntpClient {
 	}
 
 	boolean canRetry() {
-		return retryExecutorService != null && !retryingRegistration;
+		return retryExecutorService != null;
 	}
 	
 	void retryRegistration() {
 		if (canRetry()) {
-			retryingRegistration = true;
 			logger.info("Scheduling registration retry in [{}-{}]", retryTime, retryTimeUnit);
 			retryExecutorService.schedule(new Runnable() {
 				@Override
 				public void run() {
-					retryingRegistration = false;
 					register();
 				}
 			}, retryTime, retryTimeUnit);
