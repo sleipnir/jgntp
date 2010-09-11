@@ -39,7 +39,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 
 	@Override
 	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-		logger.debug("Channel closed [{}]", e.getChannel());
+		logger.trace("Channel closed [{}]", e.getChannel());
 	}
 
 	@Override
