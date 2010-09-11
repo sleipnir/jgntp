@@ -31,9 +31,9 @@ import com.google.code.jgntp.internal.message.*;
 import com.google.common.base.*;
 import com.google.common.collect.*;
 
-public class NioGntpClient implements GntpClient {
+public class NioTcpGntpClient implements GntpClient {
 
-	private static final Logger logger = LoggerFactory.getLogger(NioGntpClient.class);
+	private static final Logger logger = LoggerFactory.getLogger(NioTcpGntpClient.class);
 
 	private final GntpApplicationInfo applicationInfo;
 	private final GntpPassword password;
@@ -53,7 +53,7 @@ public class NioGntpClient implements GntpClient {
 	private final Map<GntpNotification, Integer> notificationRetries;
 	private volatile boolean closed;
 
-	public NioGntpClient(GntpApplicationInfo applicationInfo, SocketAddress growlAddress, Executor executor, GntpListener listener, GntpPassword password, boolean encrypted, long retryTime,
+	public NioTcpGntpClient(GntpApplicationInfo applicationInfo, SocketAddress growlAddress, Executor executor, GntpListener listener, GntpPassword password, boolean encrypted, long retryTime,
 			TimeUnit retryTimeUnit, int notificationRetryCount) {
 		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
 		Preconditions.checkNotNull(growlAddress, "Address must not be null");
@@ -214,7 +214,7 @@ public class NioGntpClient implements GntpClient {
 								notificationRetries.put(notification, ++count);
 								retryExecutorService.schedule(new Runnable() {
 									public void run() {
-										NioGntpClient.this.notify(notification);
+										NioTcpGntpClient.this.notify(notification);
 									}
 								}, retryTime, retryTimeUnit);
 							} else {

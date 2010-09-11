@@ -28,10 +28,10 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 
 	private Logger logger = LoggerFactory.getLogger(GntpChannelHandler.class);
 
-	private final NioGntpClient gntpClient;
+	private final NioTcpGntpClient gntpClient;
 	private final GntpListener listener;
 
-	public GntpChannelHandler(NioGntpClient gntpClient, GntpListener listener) {
+	public GntpChannelHandler(NioTcpGntpClient gntpClient, GntpListener listener) {
 		this.gntpClient = gntpClient;
 		this.listener = listener;
 	}
