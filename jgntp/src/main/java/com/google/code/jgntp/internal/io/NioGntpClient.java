@@ -59,8 +59,6 @@ public abstract class NioGntpClient implements GntpClient {
 
 	abstract BiMap<Long, Object> getNotificationsSent();
 
-	abstract boolean canRetry();
-
 	abstract void retryRegistration();
 
 	public void register() {

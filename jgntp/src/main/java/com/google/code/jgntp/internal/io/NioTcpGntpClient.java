@@ -112,7 +112,7 @@ public class NioTcpGntpClient extends NioGntpClient {
 					GntpMessage message = new GntpNotifyMessage(notification, notificationId, getPassword(), isEncrypted());
 					future.getChannel().write(message);
 				} else {
-					if (canRetry()) {
+					if (retryExecutorService != null) {
 						Integer count = notificationRetries.get(notification);
 						if (count == null) {
 							count = 1;
@@ -150,12 +150,8 @@ public class NioTcpGntpClient extends NioGntpClient {
 		return notificationsSent;
 	}
 
-	boolean canRetry() {
-		return retryExecutorService != null;
-	}
-
 	void retryRegistration() {
-		if (canRetry()) {
+		if (retryExecutorService != null) {
 			logger.info("Scheduling registration retry in [{}-{}]", retryTime, retryTimeUnit);
 			retryExecutorService.schedule(new Runnable() {
 				@Override

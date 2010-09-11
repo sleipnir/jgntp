@@ -16,6 +16,7 @@
 package com.google.code.jgntp.internal.io;
 
 import java.io.*;
+import java.net.*;
 
 import org.jboss.netty.channel.*;
 import org.slf4j.*;
@@ -44,6 +45,34 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		GntpMessageResponse message = (GntpMessageResponse) e.getMessage();
+		handleMessage(message);
+		e.getChannel().close();
+	}
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+		try {
+			Throwable cause = e.getCause();
+			if (gntpClient.isRegistered()) {
+				handleIOError(cause);
+			} else {
+				if (cause instanceof ConnectException) {
+					gntpClient.retryRegistration();
+				} else if (cause instanceof IOException) {
+					// GfW is closing connections prematurely sometimes
+					// IOException is thrown with the message "An existing connection was forcibly closed by the remote host"
+					// so just assume we're registered successfully if we didn't get a "Connection refused" during registration
+					handleMessage(new GntpOkMessage(-1, GntpMessageType.REGISTER, null));
+				} else {
+					handleIOError(cause);
+				}
+			}
+		} finally {
+			e.getChannel().close();
+		}
+	}
+
+	protected void handleMessage(GntpMessageResponse message) {
 		Preconditions.checkState(message instanceof GntpOkMessage || message instanceof GntpCallbackMessage || message instanceof GntpErrorMessage);
 
 		if (gntpClient.isRegistered()) {
@@ -83,10 +112,9 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 					if (listener != null) {
 						listener.onNotificationError(notification, errorMessage.getStatus(), errorMessage.getDescription());
 					}
-					if ((GntpErrorStatus.UNKNOWN_APPLICATION == errorMessage.getStatus() ||
-						GntpErrorStatus.UNKNOWN_NOTIFICATION == errorMessage.getStatus()) &&
-						gntpClient.canRetry()) {
-						gntpClient.register();
+					if (GntpErrorStatus.UNKNOWN_APPLICATION == errorMessage.getStatus() ||
+						GntpErrorStatus.UNKNOWN_NOTIFICATION == errorMessage.getStatus()) {
+						gntpClient.retryRegistration();
 					}
 				}
 			}
@@ -109,23 +137,13 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 				}
 			}
 		}
-		e.getChannel().close();
 	}
-
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-		try {
-			if (listener == null) {
-				logger.error("Error in GNTP I/O operation", e.getCause());
-			} else {
-				listener.onCommunicationError(e.getCause());
-			}
-			if (e.getCause() instanceof IOException && !gntpClient.isRegistered()) {
-				gntpClient.retryRegistration();
-			}
-		} finally {
-			e.getChannel().close();
+	
+	protected void handleIOError(Throwable t) {
+		if (listener == null) {
+			logger.error("Error in GNTP I/O operation", t);
+		} else {
+			listener.onCommunicationError(t);
 		}
 	}
-
 }
