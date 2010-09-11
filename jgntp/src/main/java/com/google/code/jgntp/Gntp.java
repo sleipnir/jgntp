@@ -155,7 +155,7 @@ public class Gntp {
 			growlAddress = new InetSocketAddress(growlHost, growlPort);
 		}
 		Executor executorToUse = executor == null ? Executors.newCachedThreadPool() : executor;
-		return new NioGntpClient(applicationInfo, growlAddress, executorToUse, listener, password, encrypted, retryTime, retryTimeUnit, notificationRetryCount);
+		return new NioTcpGntpClient(applicationInfo, growlAddress, executorToUse, listener, password, encrypted, retryTime, retryTimeUnit, notificationRetryCount);
 	}
 
 	private int getPort() {
