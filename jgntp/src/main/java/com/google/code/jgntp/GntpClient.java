@@ -63,9 +63,11 @@ public interface GntpClient {
 	 * @param notification Notification to send.
 	 * @param time The maximum time to wait.
 	 * @param unit The time unit of the {@code time} argument.
+	 * @return True if this client sent the notification successfully before the waiting
+	 *         time elapsed, false otherwise.
 	 * @throws InterruptedException If the current thread is interrupted.
 	 */
-	void notify(GntpNotification notification, long time, TimeUnit unit) throws InterruptedException;
+	boolean notify(GntpNotification notification, long time, TimeUnit unit) throws InterruptedException;
 
 	/**
 	 * Shutdown this client waiting at most the given time.
@@ -75,4 +77,9 @@ public interface GntpClient {
 	 * @throws InterruptedException If the current thread is interrupted.
 	 */
 	void shutdown(long time, TimeUnit unit) throws InterruptedException;
+	
+	/**
+	 * @return True if this client is shut down.
+	 */
+	boolean isShutdown();
 }

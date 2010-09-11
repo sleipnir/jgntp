@@ -51,6 +51,8 @@ public class GntpClientIntegrationTest {
 		GntpNotificationInfo notif5 = Gntp.notificationInfo(info, "Notify 5").icon(getImage(VOICEMAIL_ICON)).build();
 		GntpNotificationInfo notif6 = Gntp.notificationInfo(info, "Notify 6").icon(getImage(PING_ICON)).build();
 
+//		GntpClient client = Gntp.client(info).withUdp().build();
+
 		GntpClient client = Gntp.client(info).listener(new GntpListener() {
 			@Override
 			public void onRegistrationSuccess() {

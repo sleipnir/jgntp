@@ -27,15 +27,19 @@ public class Gntp {
 	public static final String CUSTOM_HEADER_PREFIX = "X-";
 	public static final String APP_SPECIFIC_HEADER_PREFIX = "Data-";
 
-	public static final String DEFAULT_HOST = "localhost";
-	public static final int WINDOWS_PORT = 23053;
-	public static final int MAC_PORT = 23052;
+	public static final String DEFAULT_TCP_HOST = "localhost";
+	public static final String DEFAULT_UDP_HOST = "localhost";
+	public static final int WINDOWS_TCP_PORT = 23053;
+	public static final int MAC_TCP_PORT = 23052;
+	public static final int UDP_PORT = 9887;
+
 	public static final long DEFAULT_RETRY_TIME = 3;
 	public static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;
 	public static final int DEFAULT_NOTIFICATION_RETRIES = 3;
 
 	private GntpApplicationInfo applicationInfo;
 	private SocketAddress growlAddress;
+	private boolean tcp;
 	private String growlHost;
 	private int growlPort;
 	private Executor executor;
@@ -49,8 +53,9 @@ public class Gntp {
 	private Gntp(GntpApplicationInfo applicationInfo) {
 		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
 		this.applicationInfo = applicationInfo;
-		growlHost = DEFAULT_HOST;
-		growlPort = getPort();
+		tcp = true;
+		growlHost = DEFAULT_TCP_HOST;
+		growlPort = getTcpPort();
 		retryTime = DEFAULT_RETRY_TIME;
 		retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
 		notificationRetryCount = DEFAULT_NOTIFICATION_RETRIES;
@@ -90,6 +95,25 @@ public class Gntp {
 	public Gntp onPort(int port) {
 		Preconditions.checkArgument(port > 0, "Port must not be negative");
 		growlPort = port;
+		return this;
+	}
+
+	public Gntp withTcp() {
+		this.tcp = true;
+		if (growlPort == UDP_PORT) {
+			this.growlPort = getTcpPort();
+		}
+		return this;
+	}
+
+	public Gntp withUdp() {
+		this.tcp = false;
+		if (DEFAULT_TCP_HOST.equals(growlHost)) {
+			growlHost = DEFAULT_UDP_HOST;
+		}
+		if (growlPort == getTcpPort()) {
+			this.growlPort = UDP_PORT;
+		}
 		return this;
 	}
 
@@ -154,18 +178,25 @@ public class Gntp {
 		if (growlAddress == null) {
 			growlAddress = new InetSocketAddress(growlHost, growlPort);
 		}
+		if (!tcp && listener != null) {
+			throw new IllegalArgumentException("Cannot set listener on a non-TCP client");
+		}
 		Executor executorToUse = executor == null ? Executors.newCachedThreadPool() : executor;
-		return new NioTcpGntpClient(applicationInfo, growlAddress, executorToUse, listener, password, encrypted, retryTime, retryTimeUnit, notificationRetryCount);
+		if (tcp) {
+			return new NioTcpGntpClient(applicationInfo, growlAddress, executorToUse, listener, password, encrypted, retryTime, retryTimeUnit, notificationRetryCount);
+		} else {
+			return new NioUdpGntpClient(applicationInfo, growlAddress, executorToUse, password, encrypted);
+		}
 	}
 
-	private int getPort() {
+	private int getTcpPort() {
 		String osName = System.getProperty("os.name");
 		if (osName != null) {
 			osName = osName.toLowerCase();
 			if (osName.contains("mac")) {
-				return MAC_PORT;
+				return MAC_TCP_PORT;
 			}
 		}
-		return WINDOWS_PORT;
+		return WINDOWS_TCP_PORT;
 	}
 }

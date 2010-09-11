@@ -31,44 +31,32 @@ import com.google.code.jgntp.internal.message.*;
 import com.google.common.base.*;
 import com.google.common.collect.*;
 
-public class NioTcpGntpClient implements GntpClient {
+public class NioTcpGntpClient extends NioGntpClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(NioTcpGntpClient.class);
 
-	private final GntpApplicationInfo applicationInfo;
-	private final GntpPassword password;
-	private final boolean encrypted;
 	private final long retryTime;
 	private final TimeUnit retryTimeUnit;
 	private final int notificationRetryCount;
 
 	private final ClientBootstrap bootstrap;
 	private final ChannelGroup channelGroup;
-	private final CountDownLatch registrationLatch;
 	private final ScheduledExecutorService retryExecutorService;
 
 	private final AtomicLong notificationIdGenerator;
 	private final BiMap<Long, Object> notificationsSent;
 
 	private final Map<GntpNotification, Integer> notificationRetries;
-	private volatile boolean closed;
 
 	public NioTcpGntpClient(GntpApplicationInfo applicationInfo, SocketAddress growlAddress, Executor executor, GntpListener listener, GntpPassword password, boolean encrypted, long retryTime,
 			TimeUnit retryTimeUnit, int notificationRetryCount) {
-		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
-		Preconditions.checkNotNull(growlAddress, "Address must not be null");
+		super(applicationInfo, growlAddress, password, encrypted);
 		Preconditions.checkNotNull(executor, "Executor must not be null");
 		if (retryTime > 0) {
 			Preconditions.checkNotNull(retryTimeUnit, "Retry time unit must not be null");
 		}
-		if (encrypted) {
-			Preconditions.checkNotNull(password, "Password must not be null if sending encrypted messages");
-		}
 		Preconditions.checkArgument(notificationRetryCount >= 0, "Notification retries must be equal or greater than zero");
 
-		this.applicationInfo = applicationInfo;
-		this.password = password;
-		this.encrypted = encrypted;
 		this.retryTime = retryTime;
 		this.retryTimeUnit = retryTimeUnit;
 		this.notificationRetryCount = notificationRetryCount;
@@ -93,21 +81,17 @@ public class NioTcpGntpClient implements GntpClient {
 		// see GntpChannelHandler for details
 		notificationsSent = HashBiMap.create();
 
-		registrationLatch = new CountDownLatch(1);
 		notificationRetries = Maps.newConcurrentMap();
 	}
 
-	public void register() {
-		if (closed) {
-			throw new IllegalStateException("GntpClient has been shutdown");
-		}
-		logger.debug("Registering GNTP application [{}]", applicationInfo);
+	@Override
+	protected void doRegister() {
 		bootstrap.connect().addListener(new ChannelFutureListener() {
 			@Override
 			public void operationComplete(ChannelFuture future) throws Exception {
 				if (future.isSuccess()) {
 					channelGroup.add(future.getChannel());
-					GntpMessage message = new GntpRegisterMessage(applicationInfo, password, encrypted);
+					GntpMessage message = new GntpRegisterMessage(getApplicationInfo(), getPassword(), isEncrypted());
 					future.getChannel().write(message);
 				}
 			}
@@ -115,48 +99,45 @@ public class NioTcpGntpClient implements GntpClient {
 	}
 
 	@Override
-	public boolean isRegistered() {
-		return registrationLatch.getCount() == 0 && !closed;
-	}
+	protected void doNotify(final GntpNotification notification) {
+		bootstrap.connect().addListener(new ChannelFutureListener() {
+			@Override
+			public void operationComplete(ChannelFuture future) throws Exception {
+				if (future.isSuccess()) {
+					channelGroup.add(future.getChannel());
 
-	@Override
-	public void waitRegistration() throws InterruptedException {
-		registrationLatch.await();
-	}
+					long notificationId = notificationIdGenerator.getAndIncrement();
+					notificationsSent.put(notificationId, notification);
 
-	@Override
-	public boolean waitRegistration(long time, TimeUnit unit) throws InterruptedException {
-		return registrationLatch.await(time, unit);
-	}
-
-	@Override
-	public void notify(GntpNotification notification) {
-		boolean interrupted = false;
-		while (!closed) {
-			try {
-				waitRegistration();
-				notifyInternal(notification);
-				break;
-			} catch (InterruptedException e) {
-				interrupted = true;
+					GntpMessage message = new GntpNotifyMessage(notification, notificationId, getPassword(), isEncrypted());
+					future.getChannel().write(message);
+				} else {
+					if (canRetry()) {
+						Integer count = notificationRetries.get(notification);
+						if (count == null) {
+							count = 1;
+						}
+						if (count <= notificationRetryCount) {
+							logger.debug("Failed to send notification [{}], retry [{}/{}] in [{}-{}]", new Object[] { notification, count, notificationRetryCount, retryTime, retryTimeUnit });
+							notificationRetries.put(notification, ++count);
+							retryExecutorService.schedule(new Runnable() {
+								public void run() {
+									NioTcpGntpClient.this.notify(notification);
+								}
+							}, retryTime, retryTimeUnit);
+						} else {
+							logger.debug("Failed to send notification [{}], giving up", notification);
+							notificationRetries.remove(notification);
+						}
+					}
+					notificationsSent.inverse().remove(notification);
+				}
 			}
-		}
-		if (interrupted) {
-			Thread.currentThread().interrupt();
-		}
+		});
 	}
-
+	
 	@Override
-	public void notify(GntpNotification notification, long time, TimeUnit unit) throws InterruptedException {
-		if (waitRegistration(time, unit)) {
-			notifyInternal(notification);
-		}
-	}
-
-	@Override
-	public void shutdown(long timeout, TimeUnit unit) throws InterruptedException {
-		closed = true;
-		registrationLatch.countDown();
+	protected void doShutdown(long timeout, TimeUnit unit) throws InterruptedException {
 		if (retryExecutorService != null) {
 			retryExecutorService.shutdownNow();
 			retryExecutorService.awaitTermination(timeout, unit);
@@ -164,11 +145,7 @@ public class NioTcpGntpClient implements GntpClient {
 		channelGroup.close().await(timeout, unit);
 		bootstrap.releaseExternalResources();
 	}
-
-	void setRegistered() {
-		registrationLatch.countDown();
-	}
-
+	
 	BiMap<Long, Object> getNotificationsSent() {
 		return notificationsSent;
 	}
@@ -186,46 +163,6 @@ public class NioTcpGntpClient implements GntpClient {
 					register();
 				}
 			}, retryTime, retryTimeUnit);
-		}
-	}
-
-	protected void notifyInternal(final GntpNotification notification) {
-		if (!closed) {
-			logger.debug("Sending notification [{}]", notification);
-			bootstrap.connect().addListener(new ChannelFutureListener() {
-				@Override
-				public void operationComplete(ChannelFuture future) throws Exception {
-					if (future.isSuccess()) {
-						channelGroup.add(future.getChannel());
-
-						long notificationId = notificationIdGenerator.getAndIncrement();
-						notificationsSent.put(notificationId, notification);
-
-						GntpMessage message = new GntpNotifyMessage(notification, notificationId, password, encrypted);
-						future.getChannel().write(message);
-					} else {
-						if (canRetry()) {
-							Integer count = notificationRetries.get(notification);
-							if (count == null) {
-								count = 1;
-							}
-							if (count <= notificationRetryCount) {
-								logger.debug("Failed to send notification [{}], retry [{}/{}] in [{}-{}]", new Object[] { notification, count, notificationRetryCount, retryTime, retryTimeUnit });
-								notificationRetries.put(notification, ++count);
-								retryExecutorService.schedule(new Runnable() {
-									public void run() {
-										NioTcpGntpClient.this.notify(notification);
-									}
-								}, retryTime, retryTimeUnit);
-							} else {
-								logger.debug("Failed to send notification [{}], giving up", notification);
-								notificationRetries.remove(notification);
-							}
-						}
-						notificationsSent.inverse().remove(notification);
-					}
-				}
-			});
 		}
 	}
 

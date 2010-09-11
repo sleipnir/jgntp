@@ -31,7 +31,9 @@ import com.google.common.io.*;
 @Sharable
 public class GntpMessageDecoder extends OneToOneDecoder {
 
-	private static final Logger logger = LoggerFactory.getLogger(GntpMessageDecoder.class);
+	public static final String LOGGER_NAME = "jgntp.message";
+
+	private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
 
 	private static final String DUMP_MESSAGES_DIRECTORY_PROPERTY = "gntp.response.dump.dir";
 
@@ -63,14 +65,13 @@ public class GntpMessageDecoder extends OneToOneDecoder {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Message received\n{}", s);
-
-			if (dumpDir != null) {
-				try {
-					String fileName = "gntp-response-" + dumpCounter.getAndIncrement() + ".out";
-					Files.write(b, new File(dumpDir, fileName));
-				} catch (IOException e) {
-					logger.warn("Could not save GNTP request dump", e);
-				}
+		}
+		if (dumpDir != null) {
+			try {
+				String fileName = "gntp-response-" + dumpCounter.getAndIncrement() + ".out";
+				Files.write(b, new File(dumpDir, fileName));
+			} catch (IOException e) {
+				logger.warn("Could not save GNTP request dump", e);
 			}
 		}
 

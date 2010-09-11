@@ -28,7 +28,7 @@ import com.google.code.jgntp.internal.util.*;
 @Sharable
 public class GntpMessageEncoder extends SimpleChannelHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(GntpMessageEncoder.class);
+	private static final Logger logger = LoggerFactory.getLogger(GntpMessageDecoder.LOGGER_NAME);
 
 	@Override
 	@SuppressWarnings("null")
@@ -51,7 +51,7 @@ public class GntpMessageEncoder extends SimpleChannelHandler {
 			logger.debug("Sending message\n{}", new String(debugOutputStream.toByteArray(), GntpMessage.ENCODING));
 		}
 
-		Channels.write(ctx, e.getFuture(), buffer);
+		Channels.write(ctx, e.getFuture(), buffer, e.getRemoteAddress());
 	}
 
 }
