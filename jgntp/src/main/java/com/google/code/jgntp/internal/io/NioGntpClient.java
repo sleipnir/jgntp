@@ -50,7 +50,7 @@ public class NioGntpClient implements GntpClient {
 	private final AtomicLong notificationIdGenerator;
 	private final BiMap<Long, Object> notificationsSent;
 
-	private boolean retryingRegistration;
+	private volatile boolean retryingRegistration;
 	private final Map<GntpNotification, Integer> notificationRetries;
 	private volatile boolean closed;
 
