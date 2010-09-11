@@ -5,81 +5,60 @@ import java.util.concurrent.*;
 
 import org.jboss.netty.bootstrap.*;
 import org.jboss.netty.channel.socket.*;
-import org.jboss.netty.channel.socket.nio.*;
-import org.slf4j.*;
+import org.jboss.netty.channel.socket.oio.*;
 
 import com.google.code.jgntp.*;
 import com.google.code.jgntp.internal.message.*;
 import com.google.common.base.*;
+import com.google.common.collect.*;
 
-public class NioUdpGntpClient implements GntpClient {
-
-	private static final Logger logger = LoggerFactory.getLogger(NioUdpGntpClient.class);
-
-	private final GntpApplicationInfo applicationInfo;
-	private final SocketAddress growlAddress;
-	private final GntpPassword password;
-	private final boolean encrypted;
+public class NioUdpGntpClient extends NioGntpClient {
 
 	private final ConnectionlessBootstrap bootstrap;
 	private final DatagramChannel datagramChannel;
-	private final CountDownLatch registrationLatch;
-	private volatile boolean closed;
 
 	public NioUdpGntpClient(GntpApplicationInfo applicationInfo, SocketAddress growlAddress, Executor executor, GntpPassword password, boolean encrypted) {
-		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
-		Preconditions.checkNotNull(growlAddress, "Address must not be null");
+		super(applicationInfo, growlAddress, password, encrypted);
 		Preconditions.checkNotNull(executor, "Executor must not be null");
 
-		this.applicationInfo = applicationInfo;
-		this.growlAddress = growlAddress;
-		this.password = password;
-		this.encrypted = encrypted;
+		bootstrap = new ConnectionlessBootstrap(new OioDatagramChannelFactory(executor));
+		bootstrap.setPipelineFactory(new GntpChannelPipelineFactory(new GntpChannelHandler(this, null)));
+		bootstrap.setOption("broadcast", "false");
 
-		bootstrap = new ConnectionlessBootstrap(new NioDatagramChannelFactory(executor));
-		//bootstrap.setPipelineFactory(new GntpChannelPipelineFactory(new GntpChannelHandler(this, null)));
-		bootstrap.setOption("broadcast", "true");
-
-		datagramChannel = (DatagramChannel)bootstrap.bind(new InetSocketAddress(0));
-		
-		registrationLatch = new CountDownLatch(1);
+		datagramChannel = (DatagramChannel) bootstrap.bind(new InetSocketAddress(0));
 	}
 
 	@Override
-	public void register() {
-		if (closed) {
-			throw new IllegalStateException("GntpClient has been shutdown");
-		}
-		logger.debug("Registering GNTP application [{}]", applicationInfo);
-		GntpMessage message = new GntpRegisterMessage(applicationInfo, password, encrypted);
-		datagramChannel.write(message, growlAddress);
-		registrationLatch.countDown();
+	protected void doRegister() {
+		GntpMessage message = new GntpRegisterMessage(getApplicationInfo(), getPassword(), isEncrypted());
+		datagramChannel.write(message, getGrowlAddress());
+		getRegistrationLatch().countDown();
 	}
 
 	@Override
-	public boolean isRegistered() {
-		return registrationLatch.getCount() == 0 && !closed;
+	protected void doNotify(GntpNotification notification) {
+		GntpNotifyMessage message = new GntpNotifyMessage(notification, -1, getPassword(), isEncrypted());
+		datagramChannel.write(message, getGrowlAddress());
 	}
 
 	@Override
-	public void waitRegistration() throws InterruptedException {
-		registrationLatch.await();
+	protected void doShutdown(long timeout, TimeUnit unit) throws InterruptedException {
+		datagramChannel.close().await(timeout, unit);
+		bootstrap.releaseExternalResources();
 	}
 
 	@Override
-	public boolean waitRegistration(long time, TimeUnit unit) throws InterruptedException {
-		return registrationLatch.await(time, unit);
+	BiMap<Long, Object> getNotificationsSent() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void notify(GntpNotification notification) {
+	boolean canRetry() {
+		return false;
 	}
 
 	@Override
-	public void notify(GntpNotification notification, long time, TimeUnit unit) throws InterruptedException {
-	}
-
-	@Override
-	public void shutdown(long time, TimeUnit unit) throws InterruptedException {
+	void retryRegistration() {
+		throw new UnsupportedOperationException();
 	}
 }
