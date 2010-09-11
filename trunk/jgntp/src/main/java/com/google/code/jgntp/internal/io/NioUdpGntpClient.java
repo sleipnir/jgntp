@@ -14,6 +14,9 @@ import com.google.common.collect.*;
 
 public class NioUdpGntpClient extends NioGntpClient {
 
+	// UDP client does not keep track of notifications sent
+	private final static BiMap<Long, Object> notificationsSent = HashBiMap.create();
+
 	private final ConnectionlessBootstrap bootstrap;
 	private final DatagramChannel datagramChannel;
 
@@ -49,16 +52,11 @@ public class NioUdpGntpClient extends NioGntpClient {
 
 	@Override
 	BiMap<Long, Object> getNotificationsSent() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	boolean canRetry() {
-		return false;
+		return notificationsSent;
 	}
 
 	@Override
 	void retryRegistration() {
-		throw new UnsupportedOperationException();
+		// Do nothing
 	}
 }

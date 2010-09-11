@@ -104,11 +104,7 @@ public class Gntp {
 	}
 
 	public Gntp withUdp() {
-		this.tcp = false;
-		if (growlPort == getTcpPort()) {
-			this.growlPort = UDP_PORT;
-		}
-		return this;
+		throw new UnsupportedOperationException("The Growl UDP protocol is not supported");
 	}
 
 	public Gntp executor(Executor executor) {
