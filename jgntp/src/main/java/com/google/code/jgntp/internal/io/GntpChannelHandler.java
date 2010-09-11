@@ -57,11 +57,12 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 				handleIOError(cause);
 			} else {
 				if (cause instanceof ConnectException) {
+					handleIOError(cause);
 					gntpClient.retryRegistration();
 				} else if (cause instanceof IOException) {
 					// GfW is closing connections prematurely sometimes
 					// IOException is thrown with the message "An existing connection was forcibly closed by the remote host"
-					// so just assume we're registered successfully if we didn't get a "Connection refused" during registration
+					// so just assume we registered successfully if we didn't get a ConnectException during registration
 					handleMessage(new GntpOkMessage(-1, GntpMessageType.REGISTER, null));
 				} else {
 					handleIOError(cause);
