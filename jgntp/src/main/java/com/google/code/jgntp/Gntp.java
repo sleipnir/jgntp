@@ -27,8 +27,6 @@ public class Gntp {
 	public static final String CUSTOM_HEADER_PREFIX = "X-";
 	public static final String APP_SPECIFIC_HEADER_PREFIX = "Data-";
 
-	public static final String DEFAULT_TCP_HOST = "localhost";
-	public static final String DEFAULT_UDP_HOST = "localhost";
 	public static final int WINDOWS_TCP_PORT = 23053;
 	public static final int MAC_TCP_PORT = 23052;
 	public static final int UDP_PORT = 9887;
@@ -54,7 +52,6 @@ public class Gntp {
 		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
 		this.applicationInfo = applicationInfo;
 		tcp = true;
-		growlHost = DEFAULT_TCP_HOST;
 		growlPort = getTcpPort();
 		retryTime = DEFAULT_RETRY_TIME;
 		retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
@@ -108,9 +105,6 @@ public class Gntp {
 
 	public Gntp withUdp() {
 		this.tcp = false;
-		if (DEFAULT_TCP_HOST.equals(growlHost)) {
-			growlHost = DEFAULT_UDP_HOST;
-		}
 		if (growlPort == getTcpPort()) {
 			this.growlPort = UDP_PORT;
 		}
@@ -176,7 +170,7 @@ public class Gntp {
 
 	public GntpClient build() {
 		if (growlAddress == null) {
-			growlAddress = new InetSocketAddress(growlHost, growlPort);
+			growlAddress = new InetSocketAddress(getInetAddress(growlHost), growlPort);
 		}
 		if (!tcp && listener != null) {
 			throw new IllegalArgumentException("Cannot set listener on a non-TCP client");
@@ -198,5 +192,24 @@ public class Gntp {
 			}
 		}
 		return WINDOWS_TCP_PORT;
+	}
+	
+	private InetAddress getInetAddress(String name) {
+		if (name == null) {
+			try {
+				return InetAddress.getLocalHost();
+			} catch (UnknownHostException e) {
+				try {
+					return InetAddress.getByName(name);
+				} catch (UnknownHostException uhe) {
+					throw new IllegalStateException("Could not find localhost", uhe);
+				}
+			}
+		}
+		try {
+			return InetAddress.getByName(name);
+		} catch (UnknownHostException e) {
+			throw new IllegalStateException("Could not find inet address: " + name, e);
+		}
 	}
 }
