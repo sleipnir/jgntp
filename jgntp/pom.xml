@@ -12,7 +12,7 @@
 
 	<groupId>com.google.code.jgntp</groupId>
 	<artifactId>jgntp</artifactId>
-    <version>1.1</version>
+    <version>1.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<url>http://code.google.com/p/jgntp</url>
@@ -134,9 +134,9 @@
 	</build>
 
     <scm>
-        <connection>scm:svn:https://jgntp.googlecode.com/svn/tags/jgntp-1.1</connection>
-        <developerConnection>scm:svn:https://jgntp.googlecode.com/svn/tags/jgntp-1.1</developerConnection>
-        <url>http://jgntp.googlecode.com/svn/tags/jgntp-1.1</url>
+        <connection>scm:svn:https://jgntp.googlecode.com/svn/trunk/jgntp</connection>
+        <developerConnection>scm:svn:https://jgntp.googlecode.com/svn/trunk/jgntp</developerConnection>
+        <url>http://jgntp.googlecode.com/svn/trunk/jgntp</url>
     </scm>
 
     <issueManagement>
