@@ -54,7 +54,7 @@ public class NioGntpClient implements GntpClient {
 	private volatile boolean closed;
 
 	public NioGntpClient(GntpApplicationInfo applicationInfo, SocketAddress growlAddress, Executor executor, GntpListener listener, GntpPassword password, boolean encrypted, long retryTime,
-							TimeUnit retryTimeUnit, int notificationRetryCount) {
+			TimeUnit retryTimeUnit, int notificationRetryCount) {
 		Preconditions.checkNotNull(applicationInfo, "Application info must not be null");
 		Preconditions.checkNotNull(growlAddress, "Address must not be null");
 		Preconditions.checkNotNull(executor, "Executor must not be null");
@@ -98,6 +98,9 @@ public class NioGntpClient implements GntpClient {
 	}
 
 	public void register() {
+		if (closed) {
+			throw new IllegalStateException("GntpClient has been shutdown");
+		}
 		logger.debug("Registering GNTP application [{}]", applicationInfo);
 		bootstrap.connect().addListener(new ChannelFutureListener() {
 			@Override
@@ -173,7 +176,7 @@ public class NioGntpClient implements GntpClient {
 	boolean canRetry() {
 		return retryExecutorService != null;
 	}
-	
+
 	void retryRegistration() {
 		if (canRetry()) {
 			logger.info("Scheduling registration retry in [{}-{}]", retryTime, retryTimeUnit);
@@ -225,5 +228,5 @@ public class NioGntpClient implements GntpClient {
 			});
 		}
 	}
-	
+
 }
