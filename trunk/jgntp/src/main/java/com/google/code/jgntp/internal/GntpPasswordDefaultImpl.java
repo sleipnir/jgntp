@@ -68,23 +68,23 @@ public class GntpPasswordDefaultImpl implements GntpPassword {
 			throw new RuntimeException(e);
 		}
 		random.setSeed(System.currentTimeMillis());
-		byte[] salt = new byte[DEFAULT_SALT_SIZE];
-		random.nextBytes(salt);
+		byte[] saltArray = new byte[DEFAULT_SALT_SIZE];
+		random.nextBytes(saltArray);
 
-		return salt;
+		return saltArray;
 	}
 
-	protected byte[] getKeyBasis(byte[] password, byte[] salt) {
-		byte[] keyBasis = new byte[password.length + salt.length];
+	protected byte[] getKeyBasis(byte[] password, byte[] saltToUse) {
+		byte[] keyBasis = new byte[password.length + saltToUse.length];
 		System.arraycopy(password, 0, keyBasis, 0, password.length);
-		System.arraycopy(salt, 0, keyBasis, password.length, salt.length);
+		System.arraycopy(saltToUse, 0, keyBasis, password.length, saltToUse.length);
 		return keyBasis;
 	}
 
-	protected byte[] hash(byte[] key, String hashAlgorithm) {
+	protected byte[] hash(byte[] keyToUse, String hashAlgorithm) {
 		try {
 			MessageDigest messageDigest = MessageDigest.getInstance(hashAlgorithm);
-			return messageDigest.digest(key);
+			return messageDigest.digest(keyToUse);
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}

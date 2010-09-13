@@ -20,6 +20,7 @@ import java.net.*;
 
 import com.google.code.jgntp.internal.*;
 
+@SuppressWarnings("hiding")
 public class GntpApplicationInfoBuilder {
 
 	private String name;

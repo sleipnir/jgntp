@@ -24,6 +24,7 @@ import com.google.code.jgntp.internal.*;
 import com.google.common.base.*;
 import com.google.common.collect.*;
 
+@SuppressWarnings("hiding")
 public class GntpNotificationBuilder {
 
 	private String applicationName;
