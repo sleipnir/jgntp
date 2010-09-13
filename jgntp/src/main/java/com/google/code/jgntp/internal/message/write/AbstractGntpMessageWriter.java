@@ -29,10 +29,10 @@ public abstract class AbstractGntpMessageWriter implements GntpMessageWriter {
 	protected GntpPassword password;
 
 	@Override
-	public void prepare(OutputStream output, GntpPassword password) {
-		this.output = output;
-		this.writer = new OutputStreamWriter(output, GntpMessage.ENCODING);
-		this.password = password;
+	public void prepare(OutputStream outputStream, GntpPassword gntpPassword) {
+		this.output = outputStream;
+		this.writer = new OutputStreamWriter(outputStream, GntpMessage.ENCODING);
+		this.password = gntpPassword;
 	}
 
 	@Override

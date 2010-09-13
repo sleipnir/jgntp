@@ -22,6 +22,7 @@ import com.google.code.jgntp.internal.*;
 import com.google.code.jgntp.internal.io.*;
 import com.google.common.base.*;
 
+@SuppressWarnings("hiding")
 public class Gntp {
 
 	public static final String CUSTOM_HEADER_PREFIX = "X-";

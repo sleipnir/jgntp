@@ -39,12 +39,12 @@ public class EncryptedGntpMessageWriter extends AbstractGntpMessageWriter {
 	private ChannelBuffer buffer;
 
 	@Override
-	public void prepare(OutputStream output, GntpPassword password) {
-		super.prepare(output, password);
+	public void prepare(OutputStream outputStream, GntpPassword gntpPassword) {
+		super.prepare(outputStream, gntpPassword);
 		buffer = ChannelBuffers.dynamicBuffer();
 		try {
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(DEFAULT_ALGORITHM);
-			secretKey = keyFactory.generateSecret(new DESKeySpec(password.getKey()));
+			secretKey = keyFactory.generateSecret(new DESKeySpec(gntpPassword.getKey()));
 			iv = new IvParameterSpec(secretKey.getEncoded());
 
 			cipher = Cipher.getInstance(DEFAULT_TRANSFORMATION);
