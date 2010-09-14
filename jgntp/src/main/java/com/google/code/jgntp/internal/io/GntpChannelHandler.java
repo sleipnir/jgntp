@@ -64,6 +64,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 					// GfW is closing connections prematurely sometimes
 					// IOException is thrown with the message "An existing connection was forcibly closed by the remote host"
 					// so just assume we registered successfully if we didn't get a ConnectException during registration
+					// See discussion about it here: http://groups.google.com/group/growl-for-windows/browse_frm/thread/2523afc60296594
 					handleMessage(new GntpOkMessage(-1, GntpMessageType.REGISTER, null));
 				} else {
 					handleIOError(cause);
