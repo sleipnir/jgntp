@@ -42,6 +42,7 @@ public class NioTcpGntpClient extends NioGntpClient {
 	private final ClientBootstrap bootstrap;
 	private final ChannelGroup channelGroup;
 	private final ScheduledExecutorService retryExecutorService;
+	private volatile boolean tryingRegistration;
 
 	private final AtomicLong notificationIdGenerator;
 	private final BiMap<Long, Object> notificationsSent;
@@ -89,6 +90,7 @@ public class NioTcpGntpClient extends NioGntpClient {
 		bootstrap.connect().addListener(new ChannelFutureListener() {
 			@Override
 			public void operationComplete(ChannelFuture future) throws Exception {
+				tryingRegistration = false;
 				if (future.isSuccess()) {
 					channelGroup.add(future.getChannel());
 					GntpMessage message = new GntpRegisterMessage(getApplicationInfo(), getPassword(), isEncrypted());
@@ -151,7 +153,8 @@ public class NioTcpGntpClient extends NioGntpClient {
 	}
 
 	void retryRegistration() {
-		if (retryExecutorService != null) {
+		if (retryExecutorService != null && !tryingRegistration) {
+			tryingRegistration = true;
 			logger.info("Scheduling registration retry in [{}-{}]", retryTime, retryTimeUnit);
 			retryExecutorService.schedule(new Runnable() {
 				@Override

@@ -60,6 +60,7 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 					handleIOError(cause);
 					gntpClient.retryRegistration();
 				} else if (cause instanceof IOException) {
+					// This code is necessary until Grow for Windows version 2.0.4, later versions should not need it
 					// GfW is closing connections prematurely sometimes
 					// IOException is thrown with the message "An existing connection was forcibly closed by the remote host"
 					// so just assume we registered successfully if we didn't get a ConnectException during registration
