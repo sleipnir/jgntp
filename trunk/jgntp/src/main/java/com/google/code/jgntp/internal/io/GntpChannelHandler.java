@@ -46,7 +46,6 @@ public class GntpChannelHandler extends SimpleChannelUpstreamHandler {
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		GntpMessageResponse message = (GntpMessageResponse) e.getMessage();
 		handleMessage(message);
-		e.getChannel().close();
 	}
 
 	@Override
