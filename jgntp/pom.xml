@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>r06</version>
+			<version>24.1.1-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.netty</groupId>
@@ -158,7 +158,7 @@
 			<id>lehphyro</id>
 			<name>Leandro Aparecido</name>
 			<email>lehphyro@gmail.com</email>
-			<url />
+			<url/>
 			<roles>
                 <role>Leader</role>
 				<role>Developer</role>
